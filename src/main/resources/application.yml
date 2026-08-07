@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: community
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/community
+    username: root
+    password: 123456
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
+server:
+  servlet:
+    context-path: /api
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+
+community:
+  jwt:
+    secret: community-jwt-secret-2026-keep-it-safe-x
+    expire: 604800000
+
