@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
 
 // 统一的 axios 实例：所有接口请求都走这里
 const request = axios.create({

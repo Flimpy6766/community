@@ -1,66 +1,73 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { useUserStore } from '@/stores/user'
+import { onMounted, ref } from 'vue'
+import ArticleCard from '@/components/ArticleCard.vue'
+import { getArticleList, type ArticleVO } from '@/api/article'
 
-const router = useRouter()
-const userStore = useUserStore()
+const loading = ref(false)
+const articles = ref<ArticleVO[]>([])
+const total = ref(0)
+const currentPage = ref(1)
+const pageSize = 10
 
-function handleLogout() {
-  userStore.logout()
-  ElMessage.success('已退出登录')
-  router.push('/login')
+async function fetchArticles() {
+  loading.value = true
+  try {
+    const data = await getArticleList(currentPage.value, pageSize)
+    articles.value = data.records
+    total.value = data.total
+  } catch {
+    // 错误提示已在 axios 拦截器统一处理
+  } finally {
+    loading.value = false
+  }
 }
+
+onMounted(fetchArticles)
 </script>
 
 <template>
-  <div class="home">
-    <h1>Community 内容社区</h1>
-    <p
-      v-if="userStore.userInfo"
-      class="home-user"
+  <div class="article-list">
+    <div
+      v-loading="loading"
+      class="article-container"
     >
-      你好，{{ userStore.userInfo.nickname }}
-    </p>
-    <div class="home-actions">
-      <el-button
-        type="primary"
-        @click="router.push('/register')"
-      >
-        去注册
-      </el-button>
-      <el-button
-        v-if="!userStore.userInfo"
-        type="success"
-        @click="router.push('/login')"
-      >
-        去登录
-      </el-button>
-      <el-button
-        v-else
-        type="danger"
-        @click="handleLogout"
-      >
-        退出登录
-      </el-button>
+      <el-empty
+        v-if="!loading && articles.length === 0"
+        description="还没有文章，去发布第一篇吧"
+      />
+      <ArticleCard
+        v-for="article in articles"
+        :key="article.id"
+        :article="article"
+      />
     </div>
+    <el-pagination
+      v-if="total > pageSize"
+      v-model:current-page="currentPage"
+      class="article-pagination"
+      layout="prev, pager, next"
+      :total="total"
+      :page-size="pageSize"
+      @current-change="fetchArticles"
+    />
   </div>
 </template>
 
 <style scoped>
-.home {
+.article-list {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding-top: 20vh;
+  gap: 16px;
 }
 
-.home-actions {
+.article-container {
   display: flex;
+  flex-direction: column;
   gap: 12px;
+  min-height: 200px;
 }
 
-.home-user {
-  color: #666;
+.article-pagination {
+  justify-content: center;
 }
 </style>

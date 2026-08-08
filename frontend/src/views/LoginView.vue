@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
@@ -104,7 +104,7 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #eef2ff 0%, #fdf4ff 100%);
+  background: var(--app-auth-bg);
   padding: 24px;
 }
 
@@ -117,7 +117,7 @@ async function handleLogin() {
 .auth-title {
   margin: 0 0 24px;
   text-align: center;
-  font-size: 24px;
+  font-size: calc(var(--app-font-size) + 8px);
 }
 
 .auth-submit {
@@ -128,8 +128,8 @@ async function handleLogin() {
 .auth-switch {
   margin: 16px 0 0;
   text-align: center;
-  font-size: 14px;
-  color: #666;
+  font-size: calc(var(--app-font-size) - 2px);
+  color: var(--app-text-secondary);
 }
 
 .auth-switch a {

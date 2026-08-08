@@ -1,0 +1,264 @@
+/* ============================================
+ * 主题变量集中管理
+ * 后续"网站样式"面板：切换 html[data-theme] 即可换肤
+ * 结构：蓝/红/绿 三色 × 浅/深 两套
+ * 浅色主色用淡色（淡蓝/淡红/淡绿），深色主色加深
+ * --app-icon 图标颜色与主色 --app-primary 保持一致
+ * ============================================ */
+
+:root,
+html[data-theme='blue-light'] {
+  --app-font-size: 16px;
+  --app-primary: #4d9bf8;
+  --app-primary-strong: #3b82f6;
+  --app-primary-soft: rgba(77, 155, 248, 0.12);
+  --app-bg: #e8f0fa;
+  --app-bg-start: #d9e9fb;
+  --app-bg-end: #f6fafd;
+  --app-bg-shape-1: rgba(96, 165, 250, 0.16);
+  --app-bg-shape-2: rgba(59, 130, 246, 0.12);
+  --app-bg-shape-3: rgba(147, 197, 253, 0.2);
+  --app-bg-shape-4: rgba(96, 165, 250, 0.14);
+  --app-surface: rgba(255, 255, 255, 0.8);
+  --app-surface-soft: rgba(255, 255, 255, 0.6);
+  --app-surface-solid: #ffffff;
+  --app-text: #1d2129;
+  --app-text-secondary: #667085;
+  --app-icon: #4d9bf8;
+  --app-divider: rgba(0, 0, 0, 0.15);
+  --app-border: rgba(0, 0, 0, 0.08);
+  --app-muted: rgba(0, 0, 0, 0.05);
+  --app-auth-bg: linear-gradient(135deg, #eef2ff 0%, #fdf4ff 100%);
+  --el-color-primary: #4d9bf8;
+  --el-color-primary-light-3: #82b9fa;
+  --el-color-primary-light-5: #a6cdfc;
+  --el-color-primary-light-7: #cae1fd;
+  --el-color-primary-light-8: #dbebfe;
+  --el-color-primary-light-9: #edf5fe;
+  --el-color-primary-dark-2: #3e7cc6;
+  --el-card-bg-color: var(--app-surface-solid);
+  --el-border-color: var(--app-border);
+  --el-border-color-light: var(--app-border);
+}
+
+html[data-theme='blue-dark'] {
+  --app-primary: #2f6fdb;
+  --app-primary-strong: #2456b8;
+  --app-primary-soft: rgba(47, 111, 219, 0.18);
+  --app-bg: #0f172a;
+  --app-bg-start: #0b1526;
+  --app-bg-end: #15233c;
+  --app-bg-shape-1: rgba(96, 165, 250, 0.14);
+  --app-bg-shape-2: rgba(59, 130, 246, 0.12);
+  --app-bg-shape-3: rgba(37, 99, 235, 0.18);
+  --app-bg-shape-4: rgba(59, 130, 246, 0.1);
+  --app-surface: rgba(30, 41, 59, 0.85);
+  --app-surface-soft: rgba(255, 255, 255, 0.07);
+  --app-surface-solid: #1e293b;
+  --app-text: #e2e8f0;
+  --app-text-secondary: #94a3b8;
+  --app-icon: #2f6fdb;
+  --app-divider: rgba(255, 255, 255, 0.2);
+  --app-border: rgba(255, 255, 255, 0.1);
+  --app-muted: rgba(255, 255, 255, 0.06);
+  --app-auth-bg: linear-gradient(135deg, #12203a 0%, #1a2a47 100%);
+  --el-color-primary: #2f6fdb;
+  --el-color-primary-light-3: #6d9ae6;
+  --el-color-primary-light-5: #97b7ed;
+  --el-color-primary-light-7: #c1d4f4;
+  --el-color-primary-light-8: #d5e2f8;
+  --el-color-primary-light-9: #eaf1fb;
+  --el-color-primary-dark-2: #2659af;
+  --el-bg-color: var(--app-surface-solid);
+  --el-bg-color-overlay: #2b3a54;
+  --el-bg-color-page: var(--app-bg);
+  --el-fill-color: rgba(255, 255, 255, 0.1);
+  --el-fill-color-light: rgba(255, 255, 255, 0.08);
+  --el-fill-color-lighter: rgba(255, 255, 255, 0.06);
+  --el-fill-color-extra-light: rgba(255, 255, 255, 0.04);
+  --el-fill-color-blank: transparent;
+  --el-text-color-primary: #e2e8f0;
+  --el-text-color-regular: #cbd5e1;
+  --el-text-color-secondary: #94a3b8;
+  --el-text-color-placeholder: #64748b;
+  --el-text-color-disabled: #475569;
+  --el-border-color: rgba(255, 255, 255, 0.14);
+  --el-border-color-light: rgba(255, 255, 255, 0.1);
+  --el-border-color-lighter: rgba(255, 255, 255, 0.08);
+  --el-border-color-extra-light: rgba(255, 255, 255, 0.06);
+  --el-border-color-dark: rgba(255, 255, 255, 0.2);
+  --el-border-color-hover: rgba(255, 255, 255, 0.24);
+  --el-mask-color: rgba(0, 0, 0, 0.6);
+  --el-box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --el-box-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme='red-light'] {
+  --app-primary: #f07072;
+  --app-primary-strong: #ef4444;
+  --app-primary-soft: rgba(240, 112, 114, 0.12);
+  --app-bg: #fdf1f0;
+  --app-bg-start: #fdeceb;
+  --app-bg-end: #fdf7f6;
+  --app-bg-shape-1: rgba(248, 113, 113, 0.14);
+  --app-bg-shape-2: rgba(239, 68, 68, 0.1);
+  --app-bg-shape-3: rgba(251, 146, 146, 0.18);
+  --app-bg-shape-4: rgba(248, 113, 113, 0.12);
+  --app-surface: rgba(255, 255, 255, 0.8);
+  --app-surface-soft: rgba(255, 255, 255, 0.6);
+  --app-surface-solid: #ffffff;
+  --app-text: #1d2129;
+  --app-text-secondary: #667085;
+  --app-icon: #f07072;
+  --app-divider: rgba(0, 0, 0, 0.15);
+  --app-border: rgba(0, 0, 0, 0.08);
+  --app-muted: rgba(0, 0, 0, 0.05);
+  --app-auth-bg: linear-gradient(135deg, #fef2f2 0%, #fdf4ff 100%);
+  --el-color-primary: #f07072;
+  --el-color-primary-light-3: #f59b9c;
+  --el-color-primary-light-5: #f8b8b9;
+  --el-color-primary-light-7: #fbd4d5;
+  --el-color-primary-light-8: #fce2e3;
+  --el-color-primary-light-9: #fef1f1;
+  --el-color-primary-dark-2: #c05a5b;
+  --el-card-bg-color: var(--app-surface-solid);
+  --el-border-color: var(--app-border);
+  --el-border-color-light: var(--app-border);
+}
+
+html[data-theme='red-dark'] {
+  --app-primary: #d72626;
+  --app-primary-strong: #a81e1e;
+  --app-primary-soft: rgba(215, 38, 38, 0.18);
+  --app-bg: #2a1215;
+  --app-bg-start: #241014;
+  --app-bg-end: #331b1f;
+  --app-bg-shape-1: rgba(248, 113, 113, 0.14);
+  --app-bg-shape-2: rgba(220, 38, 38, 0.12);
+  --app-bg-shape-3: rgba(185, 28, 28, 0.16);
+  --app-bg-shape-4: rgba(220, 38, 38, 0.1);
+  --app-surface: rgba(59, 31, 35, 0.85);
+  --app-surface-soft: rgba(255, 255, 255, 0.07);
+  --app-surface-solid: #3b1f23;
+  --app-text: #f3e8e8;
+  --app-text-secondary: #b3a3a3;
+  --app-icon: #d72626;
+  --app-divider: rgba(255, 255, 255, 0.2);
+  --app-border: rgba(255, 255, 255, 0.1);
+  --app-muted: rgba(255, 255, 255, 0.06);
+  --app-auth-bg: linear-gradient(135deg, #33181a 0%, #442326 100%);
+  --el-color-primary: #d72626;
+  --el-color-primary-light-3: #e36767;
+  --el-color-primary-light-5: #eb9393;
+  --el-color-primary-light-7: #f3bebe;
+  --el-color-primary-light-8: #f7d4d4;
+  --el-color-primary-light-9: #fbe9e9;
+  --el-color-primary-dark-2: #ac1e1e;
+  --el-bg-color: var(--app-surface-solid);
+  --el-bg-color-overlay: #4a2a2e;
+  --el-bg-color-page: var(--app-bg);
+  --el-fill-color: rgba(255, 255, 255, 0.1);
+  --el-fill-color-light: rgba(255, 255, 255, 0.08);
+  --el-fill-color-lighter: rgba(255, 255, 255, 0.06);
+  --el-fill-color-extra-light: rgba(255, 255, 255, 0.04);
+  --el-fill-color-blank: transparent;
+  --el-text-color-primary: #f3e8e8;
+  --el-text-color-regular: #ddc7c7;
+  --el-text-color-secondary: #b3a3a3;
+  --el-text-color-placeholder: #8a7a7a;
+  --el-text-color-disabled: #6b5d5d;
+  --el-border-color: rgba(255, 255, 255, 0.14);
+  --el-border-color-light: rgba(255, 255, 255, 0.1);
+  --el-border-color-lighter: rgba(255, 255, 255, 0.08);
+  --el-border-color-extra-light: rgba(255, 255, 255, 0.06);
+  --el-border-color-dark: rgba(255, 255, 255, 0.2);
+  --el-border-color-hover: rgba(255, 255, 255, 0.24);
+  --el-mask-color: rgba(0, 0, 0, 0.6);
+  --el-box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --el-box-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme='green-light'] {
+  --app-primary: #42c76b;
+  --app-primary-strong: #22c55e;
+  --app-primary-soft: rgba(66, 199, 107, 0.12);
+  --app-bg: #eefaf0;
+  --app-bg-start: #e4f6ea;
+  --app-bg-end: #f6fcf8;
+  --app-bg-shape-1: rgba(74, 222, 128, 0.14);
+  --app-bg-shape-2: rgba(34, 197, 94, 0.1);
+  --app-bg-shape-3: rgba(134, 239, 172, 0.18);
+  --app-bg-shape-4: rgba(74, 222, 128, 0.12);
+  --app-surface: rgba(255, 255, 255, 0.8);
+  --app-surface-soft: rgba(255, 255, 255, 0.6);
+  --app-surface-solid: #ffffff;
+  --app-text: #1d2129;
+  --app-text-secondary: #64748b;
+  --app-icon: #42c76b;
+  --app-divider: rgba(0, 0, 0, 0.15);
+  --app-border: rgba(0, 0, 0, 0.08);
+  --app-muted: rgba(0, 0, 0, 0.05);
+  --app-auth-bg: linear-gradient(135deg, #eefaf0 0%, #fdf4ff 100%);
+  --el-color-primary: #42c76b;
+  --el-color-primary-light-3: #7bd897;
+  --el-color-primary-light-5: #a1e3b5;
+  --el-color-primary-light-7: #c6eed3;
+  --el-color-primary-light-8: #d9f4e1;
+  --el-color-primary-light-9: #ecf9f0;
+  --el-color-primary-dark-2: #359f56;
+  --el-card-bg-color: var(--app-surface-solid);
+  --el-border-color: var(--app-border);
+  --el-border-color-light: var(--app-border);
+}
+
+html[data-theme='green-dark'] {
+  --app-primary: #169c46;
+  --app-primary-strong: #117a36;
+  --app-primary-soft: rgba(22, 156, 70, 0.18);
+  --app-bg: #10241a;
+  --app-bg-start: #0d2016;
+  --app-bg-end: #163324;
+  --app-bg-shape-1: rgba(74, 222, 128, 0.14);
+  --app-bg-shape-2: rgba(22, 156, 70, 0.12);
+  --app-bg-shape-3: rgba(22, 101, 52, 0.18);
+  --app-bg-shape-4: rgba(22, 156, 70, 0.1);
+  --app-surface: rgba(28, 58, 43, 0.85);
+  --app-surface-soft: rgba(255, 255, 255, 0.07);
+  --app-surface-solid: #1c3a2b;
+  --app-text: #e6f2ea;
+  --app-text-secondary: #9db8a8;
+  --app-icon: #169c46;
+  --app-divider: rgba(255, 255, 255, 0.2);
+  --app-border: rgba(255, 255, 255, 0.1);
+  --app-muted: rgba(255, 255, 255, 0.06);
+  --app-auth-bg: linear-gradient(135deg, #12291c 0%, #1b3a29 100%);
+  --el-color-primary: #169c46;
+  --el-color-primary-light-3: #5cba7e;
+  --el-color-primary-light-5: #8bcea3;
+  --el-color-primary-light-7: #b9e1c8;
+  --el-color-primary-light-8: #d0ebda;
+  --el-color-primary-light-9: #e8f5ed;
+  --el-color-primary-dark-2: #127d38;
+  --el-bg-color: var(--app-surface-solid);
+  --el-bg-color-overlay: #244632;
+  --el-bg-color-page: var(--app-bg);
+  --el-fill-color: rgba(255, 255, 255, 0.1);
+  --el-fill-color-light: rgba(255, 255, 255, 0.08);
+  --el-fill-color-lighter: rgba(255, 255, 255, 0.06);
+  --el-fill-color-extra-light: rgba(255, 255, 255, 0.04);
+  --el-fill-color-blank: transparent;
+  --el-text-color-primary: #e6f2ea;
+  --el-text-color-regular: #c8ddcf;
+  --el-text-color-secondary: #9db8a8;
+  --el-text-color-placeholder: #76907f;
+  --el-text-color-disabled: #5a7263;
+  --el-border-color: rgba(255, 255, 255, 0.14);
+  --el-border-color-light: rgba(255, 255, 255, 0.1);
+  --el-border-color-lighter: rgba(255, 255, 255, 0.08);
+  --el-border-color-extra-light: rgba(255, 255, 255, 0.06);
+  --el-border-color-dark: rgba(255, 255, 255, 0.2);
+  --el-border-color-hover: rgba(255, 255, 255, 0.24);
+  --el-mask-color: rgba(0, 0, 0, 0.6);
+  --el-box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --el-box-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.3);
+}

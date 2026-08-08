@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
 import { register } from '@/api/auth'
 
 const router = useRouter()
@@ -152,8 +152,8 @@ async function handleRegister() {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* 浅色渐变背景，让页面不那么单调 */
-  background: linear-gradient(135deg, #eef2ff 0%, #fdf4ff 100%);
+  /* 跟随主题的渐变背景，深色模式下自动变深 */
+  background: var(--app-auth-bg);
   padding: 24px;
 }
 
@@ -166,7 +166,7 @@ async function handleRegister() {
 .auth-title {
   margin: 0 0 24px;
   text-align: center;
-  font-size: 24px;
+  font-size: calc(var(--app-font-size) + 8px);
 }
 
 .auth-submit {
@@ -177,8 +177,8 @@ async function handleRegister() {
 .auth-switch {
   margin: 16px 0 0;
   text-align: center;
-  font-size: 14px;
-  color: #666;
+  font-size: calc(var(--app-font-size) - 2px);
+  color: var(--app-text-secondary);
 }
 
 .auth-switch a {

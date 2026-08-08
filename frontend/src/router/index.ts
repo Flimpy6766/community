@@ -9,17 +9,47 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
     },
+    {
+      path: '/article/:id',
+      name: 'article-detail',
+      component: () => import('@/views/ArticleDetailView.vue'),
+    },
+    {
+      path: '/article/create',
+      name: 'article-create',
+      component: () => import('@/views/ArticleEditView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/article/:id/edit',
+      name: 'article-edit',
+      component: () => import('@/views/ArticleEditView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/hot',
+      name: 'hot',
+      component: () => import('@/views/HotView.vue'),
+    },
+    {
+      path: '/favorites',
+      name: 'favorites',
+      component: () => import('@/views/MyFavoritesView.vue'),
+      meta: { requiresAuth: true },
+    },
     // 需要登录才能访问的页面，在后面加 meta: { requiresAuth: true }
     {
       path: '/register',
       name: 'register',
       // 懒加载：访问到这个路由时才加载对应组件，减小首屏体积
       component: () => import('@/views/RegisterView.vue'),
+      meta: { hideNavbar: true },
     },
     {
       path: '/login',
       name: 'login',
       component: () => import('@/views/LoginView.vue'),
+      meta: { hideNavbar: true },
     },
     // 后续按路线补充：/article/:id、/article/create、/admin 等
   ],
