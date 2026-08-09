@@ -1,22 +1,17 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import {
-  IconEdit,
   IconEditFilled,
-  IconFlame,
+  IconDashboardFilled,
   IconFlameFilled,
-  IconHome,
   IconHomeFilled,
-  IconLayout,
   IconLayoutFilled,
   IconLogout2,
-  IconSettings,
+  IconSearch,
   IconSettingsFilled,
-  IconStar,
   IconStarFilled,
-  IconUser,
   IconUserFilled,
 } from '@tabler/icons-vue'
 import { useThemeStore } from '@/stores/theme'
@@ -27,27 +22,21 @@ const router = useRouter()
 const userStore = useUserStore()
 const themeStore = useThemeStore()
 
-// 图标风格：线性 / 实心（无 filled 变体的图标保持线性）
-const layoutIcon = computed(() =>
-  themeStore.iconStyle === 'filled' ? IconLayoutFilled : IconLayout,
-)
-const homeIcon = computed(() =>
-  themeStore.iconStyle === 'filled' ? IconHomeFilled : IconHome,
-)
-const flameIcon = computed(() =>
-  themeStore.iconStyle === 'filled' ? IconFlameFilled : IconFlame,
-)
-const starIcon = computed(() =>
-  themeStore.iconStyle === 'filled' ? IconStarFilled : IconStar,
-)
-const editIcon = computed(() =>
-  themeStore.iconStyle === 'filled' ? IconEditFilled : IconEdit,
-)
-const settingsIcon = computed(() =>
-  themeStore.iconStyle === 'filled' ? IconSettingsFilled : IconSettings,
-)
-const userIcon = computed(() =>
-  themeStore.iconStyle === 'filled' ? IconUserFilled : IconUser,
+// 导航栏搜索关键字
+const searchKeyword = ref('')
+
+// 提交搜索：带 keyword 跳主页（主页根据 ?keyword= 展示搜索结果）
+function handleSearch() {
+  const kw = searchKeyword.value.trim()
+  router.push({ path: '/', query: kw ? { keyword: kw } : {} })
+}
+
+// 地址栏变化时同步输入框（比如从搜索结果页切走再切回）
+watch(
+  () => route.query.keyword,
+  (val) => {
+    searchKeyword.value = typeof val === 'string' ? val : ''
+  },
 )
 
 function handleLogout() {
@@ -58,7 +47,11 @@ function handleLogout() {
 
 // 用户下拉菜单命令
 function handleUserCommand(command: string | number | object) {
-  if (command === 'logout') {
+  if (command === 'profile') {
+    router.push('/profile')
+  } else if (command === 'admin') {
+    router.push('/admin')
+  } else if (command === 'logout') {
     handleLogout()
   }
 }
@@ -83,7 +76,7 @@ function handleUserCommand(command: string | number | object) {
             class="navbar-logo"
             to="/"
           >
-            <component :is="layoutIcon" />
+            <IconLayoutFilled />
             <span>Community</span>
           </router-link>
           <span class="nav-divider" />
@@ -94,14 +87,14 @@ function handleUserCommand(command: string | number | object) {
               class="nav-item"
               to="/"
             >
-              <component :is="homeIcon" />
+              <IconHomeFilled />
               <span>主页</span>
             </router-link>
             <router-link
               class="nav-item"
               to="/hot"
             >
-              <component :is="flameIcon" />
+              <IconFlameFilled />
               <span>热榜</span>
             </router-link>
             <router-link
@@ -109,10 +102,24 @@ function handleUserCommand(command: string | number | object) {
               class="nav-item"
               to="/favorites"
             >
-              <component :is="starIcon" />
+              <IconStarFilled />
               <span>我的收藏</span>
             </router-link>
           </nav>
+
+          <!-- 导航栏搜索：回车跳主页展示搜索结果 -->
+          <el-input
+            v-model="searchKeyword"
+            class="navbar-search"
+            placeholder="搜索文章"
+            clearable
+            @keyup.enter="handleSearch"
+            @clear="handleSearch"
+          >
+            <template #prefix>
+              <IconSearch :size="16" />
+            </template>
+          </el-input>
 
           <!-- 右侧：盒子（发布文章 网站样式）| 用户 -->
           <div class="navbar-right">
@@ -122,7 +129,7 @@ function handleUserCommand(command: string | number | object) {
                 class="nav-item"
                 to="/article/create"
               >
-                <component :is="editIcon" />
+                <IconEditFilled />
                 <span>发布文章</span>
               </router-link>
               <!-- 网站样式：齿轮图标弹出面板 -->
@@ -134,7 +141,7 @@ function handleUserCommand(command: string | number | object) {
               >
                 <template #reference>
                   <span class="nav-item nav-icon-only">
-                    <component :is="settingsIcon" />
+                    <IconSettingsFilled />
                   </span>
                 </template>
                 <div class="style-panel">
@@ -193,25 +200,6 @@ function handleUserCommand(command: string | number | object) {
                       :step="1"
                     />
                   </div>
-
-                  <!-- 4. 图标风格：线性 / 实心 -->
-                  <div class="style-group">
-                    <div class="style-label">
-                      <IconLayoutFilled :size="14" />
-                      图标风格
-                    </div>
-                    <el-radio-group
-                      v-model="themeStore.iconStyle"
-                      size="small"
-                    >
-                      <el-radio-button value="outline">
-                        线性
-                      </el-radio-button>
-                      <el-radio-button value="filled">
-                        实心
-                      </el-radio-button>
-                    </el-radio-group>
-                  </div>
                 </div>
               </el-popover>
             </div>
@@ -221,12 +209,26 @@ function handleUserCommand(command: string | number | object) {
               @command="handleUserCommand"
             >
               <span class="nav-item nav-user">
-                <component :is="userIcon" />
+                <IconUserFilled />
                 <span>{{ userStore.userInfo.nickname }}</span>
               </span>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="logout">
+                  <el-dropdown-item command="profile">
+                    <IconUserFilled :size="15" />
+                    个人中心
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    v-if="userStore.isAdmin"
+                    command="admin"
+                  >
+                    <IconDashboardFilled :size="15" />
+                    后台管理
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    command="logout"
+                    divided
+                  >
                     <IconLogout2 :size="15" />
                     退出登录
                   </el-dropdown-item>
@@ -238,14 +240,20 @@ function handleUserCommand(command: string | number | object) {
               class="nav-item nav-user"
               to="/login"
             >
-              <component :is="userIcon" />
+              <IconUserFilled />
               <span>登录</span>
             </router-link>
           </div>
         </div>
       </header>
-      <main class="app-main">
-        <router-view />
+      <main
+        class="app-main"
+        :class="{ 'app-main--full': route.name === 'home' }"
+      >
+        <!-- KeepAlive 只缓存主页：从详情页返回时列表数据和滚动位置都在 -->
+        <KeepAlive include="HomeView">
+          <router-view />
+        </KeepAlive>
       </main>
     </div>
   </el-config-provider>
@@ -265,8 +273,8 @@ function handleUserCommand(command: string | number | object) {
   z-index: 100;
   background: var(--app-surface);
   border-bottom: 1px solid var(--app-border);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  backdrop-filter: blur(16px) saturate(1.5);
 }
 
 .navbar-inner {
@@ -295,13 +303,39 @@ function handleUserCommand(command: string | number | object) {
   background: var(--app-divider);
 }
 
+/* 导航栏搜索：紧凑胶囊输入框，auto 外边距让它大致居中 */
+.navbar-search {
+  margin-left: auto;
+  margin-right: 16px;
+  width: 380px;
+  flex-shrink: 1;
+}
+
+.navbar-search :deep(.el-input__wrapper) {
+  border-radius: 999px;
+  background: var(--app-muted);
+  box-shadow: none;
+  transition: background-color 0.2s;
+}
+
+.navbar-search :deep(.el-input__wrapper.is-focus) {
+  background: var(--app-surface-solid);
+}
+
+@media (max-width: 768px) {
+  .navbar-search {
+    width: 150px;
+    margin-right: 8px;
+  }
+}
+
 /* 导航项盒子：主页/热榜/我的收藏，以及右侧的 发布文章/网站样式 */
 .navbar-box {
   display: flex;
   align-items: center;
   gap: 4px;
   padding: 8px 10px;
-  background: var(--app-surface-soft);
+  background: transparent;
   border-radius: 10px;
 }
 
@@ -356,6 +390,16 @@ function handleUserCommand(command: string | number | object) {
 }
 
 .app--with-nav .app-main {
+  padding-top: 60px;
+}
+
+/* 主页：hero 铺满全屏，内容区不限制宽度 */
+.app-main--full {
+  max-width: none;
+  padding: 0;
+}
+
+.app--with-nav .app-main--full {
   padding-top: 60px;
 }
 </style>

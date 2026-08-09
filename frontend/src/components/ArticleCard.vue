@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ChatDotRound, Pointer, View } from '@element-plus/icons-vue'
+import { IconEyeFilled, IconMessageCircleFilled, IconThumbUpFilled } from '@tabler/icons-vue'
 import type { ArticleVO } from '@/api/article'
 
 // 父组件传入文章数据；rank 传了就在标题前显示排名（热榜用）
-defineProps<{
+const props = defineProps<{
   article: ArticleVO
   rank?: number
 }>()
@@ -14,6 +15,23 @@ const router = useRouter()
 function formatTime(time: string) {
   return time.replace('T', ' ').slice(0, 16)
 }
+
+// 正文是 Markdown，去掉常用语法符号后作为摘要展示（图片/链接/标题/强调等）
+function excerpt(text: string): string {
+  return text
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/^#{1,6}\s*/gm, '')
+    .replace(/^>\s*/gm, '')
+    .replace(/^[-*+]\s+/gm, '')
+    .replace(/^\d+\.\s+/gm, '')
+    .replace(/[`*_~]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+// 展示的正文摘要：优先 content，没有就用 summary
+const preview = computed(() => excerpt(props.article.content || props.article.summary || ''))
 </script>
 
 <template>
@@ -21,6 +39,9 @@ function formatTime(time: string) {
     class="article-card"
     @click="router.push(`/article/${article.id}`)"
   >
+    <p class="article-author">
+      {{ article.nickname || `用户 ${article.userId}` }}
+    </p>
     <div class="article-card-head">
       <span
         v-if="rank"
@@ -34,10 +55,10 @@ function formatTime(time: string) {
       </h2>
     </div>
     <p
-      v-if="article.summary"
-      class="article-summary"
+      v-if="preview"
+      class="article-content"
     >
-      {{ article.summary }}
+      {{ preview }}
     </p>
     <div class="article-tags">
       <el-tag
@@ -52,15 +73,15 @@ function formatTime(time: string) {
     </div>
     <div class="article-stats">
       <span>
-        <el-icon><View /></el-icon>
+        <IconEyeFilled :size="15" />
         {{ article.viewCount }}
       </span>
       <span>
-        <el-icon><Pointer /></el-icon>
+        <IconThumbUpFilled :size="15" />
         {{ article.likeCount }}
       </span>
       <span>
-        <el-icon><ChatDotRound /></el-icon>
+        <IconMessageCircleFilled :size="15" />
         {{ article.commentCount }}
       </span>
       <span class="article-time">{{ formatTime(article.createTime) }}</span>
@@ -85,6 +106,12 @@ function formatTime(time: string) {
 .article-card-head {
   display: flex;
   align-items: center;
+}
+
+.article-author {
+  margin: 0 0 6px;
+  font-size: calc(var(--app-font-size) - 3px);
+  color: var(--app-text-secondary);
 }
 
 .article-rank {
@@ -115,14 +142,17 @@ function formatTime(time: string) {
 
 .article-title {
   margin: 0;
-  font-size: calc(var(--app-font-size) + 2px);
+  font-size: calc(var(--app-font-size) + 4px);
+  font-weight: 700;
   color: var(--app-text);
+  line-height: 1.4;
 }
 
-.article-summary {
-  margin: 8px 0 12px;
-  font-size: calc(var(--app-font-size) - 2px);
+.article-content {
+  margin: 8px 0 10px;
+  font-size: calc(var(--app-font-size) - 1px);
   color: var(--app-text-secondary);
+  line-height: 1.6;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -131,6 +161,7 @@ function formatTime(time: string) {
 
 .article-tags {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 10px;
 }
@@ -143,8 +174,9 @@ function formatTime(time: string) {
   color: var(--app-text-secondary);
 }
 
-.article-stats .el-icon {
+.article-stats svg {
   vertical-align: -2px;
+  flex-shrink: 0;
 }
 
 .article-time {

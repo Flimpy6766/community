@@ -12,10 +12,13 @@ public interface ArticleService {
 
     ArticleVO getDetail(Long id);
     IPage<ArticleVO> list(Integer page, Integer size);
+    IPage<ArticleVO> search(String keyword, Integer page, Integer size);
 
     LikeVO toggleLike(Long articleId);
 
     FavoriteVO toggleFavorite(Long articleId);
+
+    IPage<ArticleVO> listMyArticles(Integer status, Integer page, Integer size);
     IPage<ArticleVO> listMyFavorites(Integer page, Integer size);
 
     void addComment(Long articleId, CreateCommentDTO dto);

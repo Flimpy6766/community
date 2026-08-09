@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ChatDotRound, Pointer, Star, View } from '@element-plus/icons-vue'
+import {
+  IconEyeFilled,
+  IconMessageCircleFilled,
+  IconStarFilled,
+  IconThumbUpFilled,
+} from '@tabler/icons-vue'
 import { MdPreview } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import { useUserStore } from '@/stores/user'
@@ -237,19 +242,19 @@ onMounted(fetchDetail)
         </div>
         <div class="detail-stats">
           <span>
-            <el-icon><View /></el-icon>
+            <IconEyeFilled :size="15" />
             浏览 {{ article.viewCount }}
           </span>
           <span>
-            <el-icon><Pointer /></el-icon>
+            <IconThumbUpFilled :size="15" />
             点赞 {{ article.likeCount }}
           </span>
           <span>
-            <el-icon><Star /></el-icon>
+            <IconStarFilled :size="15" />
             收藏 {{ article.favoriteCount }}
           </span>
           <span>
-            <el-icon><ChatDotRound /></el-icon>
+            <IconMessageCircleFilled :size="15" />
             评论 {{ article.commentCount }}
           </span>
         </div>
@@ -264,7 +269,7 @@ onMounted(fetchDetail)
             :loading="likedLoading"
             @click="handleToggleLike"
           >
-            <el-icon><Pointer /></el-icon>
+            <IconThumbUpFilled :size="16" />
             {{ liked ? '已点赞' : '点赞' }} {{ article.likeCount }}
           </el-button>
           <el-button
@@ -272,7 +277,7 @@ onMounted(fetchDetail)
             :loading="favLoading"
             @click="handleToggleFavorite"
           >
-            <el-icon><Star /></el-icon>
+            <IconStarFilled :size="16" />
             {{ favorited ? '已收藏' : '收藏' }} {{ article.favoriteCount }}
           </el-button>
         </div>
@@ -444,7 +449,7 @@ onMounted(fetchDetail)
   color: var(--app-text-secondary);
 }
 
-.detail-stats .el-icon {
+.detail-stats svg {
   vertical-align: -2px;
 }
 
@@ -460,7 +465,7 @@ onMounted(fetchDetail)
   border-top: 1px solid var(--app-border);
 }
 
-.detail-interactions .el-icon {
+.detail-interactions svg {
   margin-right: 4px;
   vertical-align: -2px;
 }

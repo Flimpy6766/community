@@ -1,8 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
+import { getTokenRole } from '@/stores/user'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  // 普通跳转回到顶部；主页返回时的位置由 HomeView 自己保存/恢复（KeepAlive 场景更可靠）
+  scrollBehavior() {
+    return { top: 0 }
+  },
   routes: [
     {
       path: '/',
@@ -37,6 +42,24 @@ const router = createRouter({
       component: () => import('@/views/MyFavoritesView.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/my-articles',
+      name: 'my-articles',
+      component: () => import('@/views/MyArticlesView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('@/views/ProfileView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: () => import('@/views/AdminView.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
     // 需要登录才能访问的页面，在后面加 meta: { requiresAuth: true }
     {
       path: '/register',
@@ -62,6 +85,12 @@ router.beforeEach((to) => {
   // 想去需要登录的页面但没有 token → 跳到登录页，并记住目标地址
   if (to.meta.requiresAuth && !token) {
     return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
+  // 后台管理：需要管理员角色（解码 JWT 判断，仅用于前端入口；真正的权限由后端拦截）
+  if (to.meta.requiresAdmin && getTokenRole(token || '') !== 'ADMIN') {
+    ElMessage.warning('没有权限访问后台')
+    return { name: 'home' }
   }
 
   // 已经登录还去登录/注册页 → 直接回首页

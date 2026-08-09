@@ -73,6 +73,17 @@ export function getArticleList(page: number, size: number): Promise<PageResult<A
   >
 }
 
+// 搜索文章：GET /api/article/search?keyword=xxx&page=1&size=10（标题或正文模糊匹配）
+export function searchArticles(
+  keyword: string,
+  page: number,
+  size: number,
+): Promise<PageResult<ArticleVO>> {
+  return request.get('/article/search', {
+    params: { keyword, page, size },
+  }) as unknown as Promise<PageResult<ArticleVO>>
+}
+
 // 文章详情：GET /api/article/{id}
 export function getArticleDetail(id: number | string): Promise<ArticleVO> {
   return request.get(`/article/${id}`) as unknown as Promise<ArticleVO>
@@ -134,4 +145,15 @@ export function getMyFavorites(page: number, size: number): Promise<PageResult<A
   return request.get('/article/favorite/my', { params: { page, size } }) as unknown as Promise<
     PageResult<ArticleVO>
   >
+}
+
+// 我的文章：GET /api/article/my?status=&page=&size=（status 不传=全部，0=草稿，1=已发布）
+export function getMyArticles(
+  status: number | undefined,
+  page: number,
+  size: number,
+): Promise<PageResult<ArticleVO>> {
+  return request.get('/article/my', {
+    params: { status, page, size },
+  }) as unknown as Promise<PageResult<ArticleVO>>
 }

@@ -7,26 +7,24 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+    private final JwtUtil jwtUtil;
+    private final StringRedisTemplate stringRedisTemplate;
 
 
     @Override
@@ -63,7 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             Long.valueOf(claims.get("userId").toString()), // 身份：userId
                             null,                                          // 凭证：存储密码等等信息
-                            Collections.emptyList()                        // 权限: 存储角色权限等等
+                            List.of(new SimpleGrantedAuthority("ROLE_" + claims.get("role")))                        // 权限: 存储角色权限等等
                     );
 
                     // 记录下这个请求的来源信息（IP、SessionId 等），方便以后查看
@@ -72,7 +70,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // 把这张'临时身份证'放进 SecurityContext，表示当前请求的用户已认证通过
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {e.printStackTrace();}
 
             filterChain.doFilter(request, response);
         }

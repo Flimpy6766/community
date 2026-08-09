@@ -30,16 +30,24 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/article/**").permitAll()
                         .requestMatchers("/user/register", "/user/login", "/test/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(
-                        ex -> ex.authenticationEntryPoint((
+                        ex -> ex
+                        .authenticationEntryPoint((
                                 request,
                                 response,
                                 authException) -> {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);   // 401
                     response.setContentType("application/json;charset=UTF-8");
                     response.getWriter().write("{\"code\":401,\"message\":\"未登录或登录已过期\"}");
-                }))
+                })
+                        // 已登录但权限不够 → 403
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"code\":403,\"message\":\"没有权限\"}");
+                        }))
                 // 在用户密码验证前验证
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

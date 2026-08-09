@@ -31,24 +31,16 @@ import static com.community.util.SecurityUtil.getCurrentUserId;
 public class ArticleServiceImpl implements ArticleService {
 
     private final StringRedisTemplate stringRedisTemplate;
-
     private final ObjectMapper objectMapper; //Jackson, Spring boot 已经配置好的
-
     private final ArticleMapper articleMapper;
-
     private final ArticleTagMapper articleTagMapper;
-
     private final TagMapper tagMapper;
-
     private final UserLikeMapper userLikeMapper;
-
     private final FavoriteMapper favoriteMapper;
-
     private final CommentMapper commentMapper;
-
     private final UserMapper userMapper;
-
     private final ArticleCounter articleCounter;
+
 
     // 创建文章草稿 (status == 0)
     @Override
@@ -173,70 +165,42 @@ public class ArticleServiceImpl implements ArticleService {
 
     private static final String ARTICLE_CACHE_KEY = "article:detail:";
 
-    // 列表文章阅读
-    @Override
-    public IPage<ArticleVO> list(Integer page, Integer size) {
-
-        Page<Article> pageObj = new Page<>(page, size);
-
-        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Article::getStatus, 1)
-                .orderByDesc(Article::getCreateTime);
-
-        Page<Article> result = articleMapper.selectPage(pageObj, wrapper);
-
-        // 批量查询
-        Map<Long, List<String>> tagsMap = batchFindTags(result.getRecords());
-
-        // 每一篇从 tagsMap 获取对应标签
-        Page<ArticleVO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
-        voPage.setRecords(result.getRecords().stream()
-                .map(article -> {
-                    ArticleVO vo = new ArticleVO();
-                    BeanUtils.copyProperties(article, vo);
-                    vo.setTags(tagsMap.getOrDefault(article.getId(), Collections.emptyList()));
-                    return vo;
-                })
-                .collect(Collectors.toList()));
-
-        return voPage;
-    }
-
     // 单篇文章阅读 + Redis 热点文章缓存
     @Override
     public ArticleVO getDetail(Long id) {
-        // 先查Redis: 命中直接返回
+        // 先查 Redis 缓存（命中返回，但计数以数据库为准，避免点赞/收藏/评论后数字过期）
+        ArticleVO vo = null;
         String cached = stringRedisTemplate.opsForValue().get(ARTICLE_CACHE_KEY + id);
         if (cached != null) {
             try {
-                ArticleVO vo = objectMapper.readValue(cached, ArticleVO.class);
-                articleCounter.increaseView(id);
-                vo.setViewCount(vo.getViewCount() + (int) articleCounter.getViewIncrement(id));
-                return vo;
+                vo = objectMapper.readValue(cached, ArticleVO.class);
             } catch (JsonProcessingException e) {
-                // 反序列化失败 (格式坏了): 删掉缓存，走正常查库
+                // 反序列化失败（格式坏了）：删掉缓存，走正常查库
                 stringRedisTemplate.delete(ARTICLE_CACHE_KEY + id);
             }
         }
 
-        // 再查SQL, 如果Redis没查到
+        // 再查数据库：拿最新计数 + 校验文章是否存在
         Article article = articleMapper.selectById(id);
-
         if (article == null) {
             throw new BusinessException("文章不存在");
         }
 
-        // 未发布
+        // 未发布：仅作者可见（不计数、不缓存）
         if (article.getStatus() == 0) {
             Long currentUserId = getCurrentUserId();
             if (currentUserId == null || !currentUserId.equals(article.getUserId())) {
                 throw new BusinessException("文章不存在");
             }
-            // 未发布仅作者可见
             return toVO(article);
-        } else if (article.getStatus() == 1)  {
-            articleCounter.increaseView(id);
-            ArticleVO vo = toVO(article);   // 基准值（不含增量）
+        }
+
+        // 已发布：浏览量计数（Redis 增量，定时落库）
+        articleCounter.increaseView(id);
+
+        if (vo == null) {
+            // 缓存未命中：组装并写入缓存
+            vo = toVO(article);
             try {
                 stringRedisTemplate.opsForValue().set(
                         ARTICLE_CACHE_KEY + id,
@@ -244,11 +208,54 @@ public class ArticleServiceImpl implements ArticleService {
                         Duration.ofMinutes(30));
             } catch (JsonProcessingException ignored) {
             }
-            vo.setViewCount(vo.getViewCount() + (int) articleCounter.getViewIncrement(id));
-            return vo;
+        } else {
+            // 缓存命中：用数据库最新计数覆盖，防止缓存期间点赞/收藏/评论导致数字过期
+            vo.setLikeCount(article.getLikeCount());
+            vo.setFavoriteCount(article.getFavoriteCount());
+            vo.setCommentCount(article.getCommentCount());
+        }
+        vo.setViewCount(article.getViewCount() + (int) articleCounter.getViewIncrement(id));
+
+        // 登录用户：带出"我是否已点赞 / 已收藏"，前端按钮才能正确显示
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId != null) {
+            vo.setLiked(userLikeMapper.selectOne(new LambdaQueryWrapper<UserLike>()
+                    .eq(UserLike::getUserId, currentUserId)
+                    .eq(UserLike::getArticleId, id)) != null);
+            vo.setFavorited(favoriteMapper.selectOne(new LambdaQueryWrapper<Favorite>()
+                    .eq(Favorite::getUserId, currentUserId)
+                    .eq(Favorite::getArticleId, id)) != null);
         }
 
-        return toVO(article);
+        return vo;
+    }
+
+    // 列表文章阅读
+    @Override
+    public IPage<ArticleVO> list(Integer page, Integer size) {
+        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Article::getStatus, 1)
+                .orderByDesc(Article::getCreateTime);
+        return pageByWrapper(wrapper, page, size);
+    }
+
+    // 搜索文章（已发布，标题或正文包含关键字）
+    @Override
+    public IPage<ArticleVO> search(String keyword, Integer page, Integer size) {
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            Page<ArticleVO> empty = new Page<>(page, size, 0);
+            empty.setRecords(Collections.emptyList());
+            return empty;
+        }
+
+        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Article::getStatus, 1)
+                .and(w -> w.like(Article::getTitle, keyword)
+                        .or()
+                        .like(Article::getContent, keyword))
+                .orderByDesc(Article::getCreateTime);
+        return pageByWrapper(wrapper, page, size);
     }
 
     // 点赞
@@ -327,6 +334,21 @@ public class ArticleServiceImpl implements ArticleService {
         return vo;
     }
 
+    // 我的文章（status ：null 全部 / 0 草稿 / 1 已发布）
+    @Override
+    public IPage<ArticleVO> listMyArticles(Integer status, Integer page, Integer size) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) throw new BusinessException("请先登录");
+
+        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Article::getUserId, userId)
+                .orderByDesc(Article::getCreateTime);
+        if (status != null) {
+            wrapper.eq(Article::getStatus, status);
+        }
+        return pageByWrapper(wrapper, page, size);
+    }
+
     // 个人收藏列表
     @Override
     @Transactional
@@ -364,12 +386,7 @@ public class ArticleServiceImpl implements ArticleService {
         voPage.setRecords(favoritePage.getRecords().stream()
                 .map(favorite -> articleMap.get(favorite.getArticleId()))
                 .filter(Objects::nonNull)
-                .map(article -> {
-                    ArticleVO vo = new ArticleVO();
-                    BeanUtils.copyProperties(article, vo);
-                    vo.setTags(tagsMap.getOrDefault(article.getId(), Collections.emptyList()));
-                    return vo;
-                })
+                .map(article -> toVO(article, tagsMap))
                 .collect(Collectors.toList()));
         return voPage;
     }
@@ -510,20 +527,23 @@ public class ArticleServiceImpl implements ArticleService {
         return articleIds.stream()
                 .map(articleMap::get)
                 .filter(Objects::nonNull)
-                .map(article -> {
-                    ArticleVO vo = new ArticleVO();
-                    BeanUtils.copyProperties(article, vo);
-                    vo.setTags(tagsMap.getOrDefault(article.getId(), Collections.emptyList()));
-                    return vo;
-                })
+                .map(article -> toVO(article, tagsMap))
                 .collect(Collectors.toList());
     }
 
-    /* Article → ArticleVO，并查这篇的标签名 */
+    /** Article → ArticleVO，并查这篇的标签名 */
     private ArticleVO toVO(Article article) {
         ArticleVO vo = new ArticleVO();
         BeanUtils.copyProperties(article, vo);   // 同名字段自动复制
         vo.setTags(findTagNames(article.getId()));
+        return vo;
+    }
+
+    /** 标签从现成的 Map 取, 再 Article → ArticleVO*/
+    private ArticleVO toVO(Article article, Map<Long, List<String>> tagsMap) {
+        ArticleVO vo = new ArticleVO();
+        BeanUtils.copyProperties(article, vo);
+        vo.setTags(tagsMap.getOrDefault(article.getId(), Collections.emptyList()));
         return vo;
     }
 
@@ -596,6 +616,31 @@ public class ArticleServiceImpl implements ArticleService {
                 .put(articleId, tagIds.stream().map(tagNameMap::get).collect(Collectors.toList())));
 
         return result;
+    }
+
+    /** 按条件查文章分页 + 组装标签 : article table */
+    private IPage<ArticleVO> pageByWrapper(LambdaQueryWrapper<Article> wrapper,
+                                           Integer page, Integer size) {
+        Page<Article> pageObj = new Page<>(page, size);
+        Page<Article> result = articleMapper.selectPage(pageObj, wrapper);
+
+        if (result == null || result.getRecords().isEmpty()) {
+            Page<ArticleVO> empty = new Page<>(page, size, 0);
+            empty.setRecords(Collections.emptyList());
+            return empty;
+        }
+
+
+        // 批量查询
+        Map<Long, List<String>> tagsMap = batchFindTags(result.getRecords());
+
+        // 每一篇从 tagsMap 获取对应标签
+        Page<ArticleVO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
+        voPage.setRecords(result.getRecords().stream()
+                .map(article -> toVO(article, tagsMap))
+                .collect(Collectors.toList()));
+
+        return voPage;
     }
 
 

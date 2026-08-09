@@ -1,20 +1,14 @@
 package com.community.controller;
 
 import com.community.common.result.Result;
-import com.community.dto.LoginDTO;
-import com.community.dto.LoginVO;
-import com.community.dto.RegisterDTO;
+import com.community.dto.*;
 import com.community.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 用户接口：注册、登录、当前用户信息
@@ -24,10 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/user")
 @Validated
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     /**
      * 用户注册
@@ -66,5 +60,29 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long userId = (Long) authentication.getPrincipal();
         return Result.success(userId);
+    }
+
+    /**
+     * 个人中心资料（登录）
+     * <p>基本信息 + 统计：我的文章数、收藏数、评论数、收到的赞数</p>
+     *
+     * @return 个人资料和统计
+     */
+    @GetMapping("/profile")
+    public Result<UserProfileVO> profile() {
+        return Result.success(userService.profile());
+    }
+
+    /**
+     * 修改个人资料（登录）
+     * <p>部分更新：传什么改什么，没传的字段不变（昵称/头像/简介）</p>
+     *
+     * @param dto 要修改的字段
+     * @return 统一返回体，无数据
+     */
+    @PutMapping("/profile")
+    public Result<Void> updateProfile(@Valid @RequestBody UpdateProfileDTO dto) {
+        userService.updateProfile(dto);
+        return Result.success();
     }
 }

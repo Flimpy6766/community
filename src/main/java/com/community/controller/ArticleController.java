@@ -80,6 +80,22 @@ public class ArticleController {
     }
 
     /**
+     * 搜索文章（公开）
+     * <p>在已发布文章中按标题或正文模糊搜索；关键字为空返回空列表</p>
+     *
+     * @param keyword 搜索关键字
+     * @param page    页码（默认 1）
+     * @param size    每页条数（默认 10）
+     * @return 分页结果：命中的文章（带标签）
+     */
+    @GetMapping("/search")
+    public Result<IPage<ArticleVO>> search(@RequestParam String keyword,
+                                           @RequestParam(defaultValue = "1") Integer page,
+                                           @RequestParam(defaultValue = "10") Integer size) {
+        return Result.success(articleService.search(keyword, page, size));
+    }
+
+    /**
      * 文章详情（公开）
      * <p>已发布文章所有人可见，浏览量 Redis 计数；草稿仅作者可见（不计数）</p>
      *
@@ -100,6 +116,22 @@ public class ArticleController {
     @PostMapping("/{id}/like")
     public Result<LikeVO> like(@PathVariable Long id) {
         return Result.success(articleService.toggleLike(id));
+    }
+
+    /**
+     * 我的文章列表（登录）
+     * <p>status 不传 = 全部（草稿+已发布），0 = 草稿箱，1 = 已发布</p>
+     *
+     * @param status 文章状态（可选：null 全部 / 0 草稿 / 1 已发布）
+     * @param page   页码（默认 1）
+     * @param size   每页条数（默认 10）
+     * @return 分页结果：我的文章
+     */
+    @GetMapping("/my")
+    public Result<IPage<ArticleVO>> my(@RequestParam(required = false) Integer status,
+                                       @RequestParam(defaultValue = "1") Integer page,
+                                       @RequestParam(defaultValue = "10") Integer size) {
+        return Result.success(articleService.listMyArticles(status, page, size));
     }
 
     /**

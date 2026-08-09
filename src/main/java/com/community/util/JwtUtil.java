@@ -24,10 +24,11 @@ public class JwtUtil {
     private Long expire;
 
     /** 生成 token */
-    public String generateToken(Long userId, String username) {
+    public String generateToken(Long userId, String username, String role) {
         return Jwts.builder()
                 .subject(username)              // 主题：存用户名
                 .claim("userId", userId)  // 自定义字段：用户ID
+                .claim("role", role)      // 用户身份
                 .issuedAt(new Date())           // 签发时间
                 .expiration(new Date(System.currentTimeMillis() + expire))  // 过期时间
                 .signWith(getSecretKey())       // 用密钥签名

@@ -11,4 +11,10 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class ArticleVO extends Article {
     private List<String> tags;
+
+    /** 当前登录用户是否已点赞（详情接口返回） */
+    private Boolean liked;
+
+    /** 当前登录用户是否已收藏（详情接口返回） */
+    private Boolean favorited;
 }
