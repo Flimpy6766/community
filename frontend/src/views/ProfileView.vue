@@ -91,10 +91,11 @@ onMounted(fetchProfile)
     v-loading="loading"
     class="profile-page"
   >
-    <el-card
+    <section
       v-if="profile"
       class="profile-card"
     >
+      <p class="profile-kicker">PERSONAL / PROFILE</p>
       <div class="profile-head">
         <div class="profile-avatar">
           <img
@@ -166,7 +167,7 @@ onMounted(fetchProfile)
           我的收藏 →
         </router-link>
       </div>
-    </el-card>
+    </section>
 
     <!-- 编辑资料弹窗 -->
     <el-dialog
@@ -231,12 +232,25 @@ onMounted(fetchProfile)
 
 <style scoped>
 .profile-page {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
+  padding: 36px 0 72px;
 }
 
 .profile-card {
-  border-radius: 12px;
+  padding: clamp(24px, 5vw, 48px);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  background: var(--app-surface-solid);
+  box-shadow: var(--app-shadow-soft);
+}
+
+.profile-kicker {
+  margin: 0 0 24px;
+  color: var(--app-primary-strong);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
 }
 
 .profile-head {
@@ -246,8 +260,8 @@ onMounted(fetchProfile)
 }
 
 .profile-avatar {
-  width: 80px;
-  height: 80px;
+  width: 88px;
+  height: 88px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -266,7 +280,9 @@ onMounted(fetchProfile)
 
 .profile-nickname {
   margin: 0;
-  font-size: calc(var(--app-font-size) + 8px);
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 750;
+  letter-spacing: -0.04em;
   color: var(--app-text);
 }
 
@@ -293,7 +309,7 @@ onMounted(fetchProfile)
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
-  margin-top: 24px;
+  margin-top: 32px;
 }
 
 .stat-item {
@@ -301,9 +317,9 @@ onMounted(fetchProfile)
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 16px 8px;
+  padding: 18px 8px;
   background: var(--app-muted);
-  border-radius: 10px;
+  border-radius: var(--app-radius-md);
   color: var(--app-primary);
 }
 
@@ -320,11 +336,42 @@ onMounted(fetchProfile)
 
 .profile-links {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
 }
 
 .profile-link {
-  font-size: calc(var(--app-font-size) - 1px);
-  color: var(--app-primary);
+  padding: 10px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  color: var(--app-primary-strong);
+  font-size: 13px;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.profile-link:hover {
+  border-color: var(--app-primary);
+  background: var(--app-primary-soft);
+}
+
+@media (max-width: 600px) {
+  .profile-page {
+    padding-top: 24px;
+  }
+
+  .profile-head {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .profile-edit-btn {
+    width: 100%;
+    margin-left: 0;
+    justify-content: center;
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 </style>

@@ -10,6 +10,8 @@ import {
 import { MdPreview } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import { useUserStore } from '@/stores/user'
+import { pageTitle } from '@/config/site'
+import { appConfig } from '@/config/app'
 import {
   addComment,
   deleteArticle,
@@ -48,6 +50,7 @@ async function fetchDetail() {
   loading.value = true
   try {
     article.value = await getArticleDetail(route.params.id as string)
+    document.title = pageTitle(article.value.title)
     liked.value = article.value.liked ?? false
     favorited.value = article.value.favorited ?? false
     await fetchComments()
@@ -62,7 +65,11 @@ async function fetchComments() {
   if (!article.value) return
   commentLoading.value = true
   try {
-    const data = await getComments(article.value.id, commentsPage.value)
+    const data = await getComments(
+      article.value.id,
+      commentsPage.value,
+      appConfig.pagination.commentPageSize,
+    )
     comments.value = data.records
     commentsTotal.value = data.total
   } catch {
@@ -184,7 +191,7 @@ async function handleDelete() {
   try {
     await deleteArticle(article.value.id)
     ElMessage.success('已删除')
-    router.push('/')
+    router.push('/home')
   } catch {
     // 错误提示已在拦截器统一处理
   }
@@ -203,7 +210,8 @@ onMounted(fetchDetail)
     class="detail-page"
   >
     <template v-if="article">
-      <el-card class="detail-card">
+      <article class="detail-card">
+        <p class="detail-kicker">ARTICLE / COMMUNITY</p>
         <h1 class="detail-title">
           {{ article.title }}
         </h1>
@@ -240,6 +248,12 @@ onMounted(fetchDetail)
             </el-button>
           </template>
         </div>
+        <p
+          v-if="article.summary"
+          class="detail-summary"
+        >
+          {{ article.summary }}
+        </p>
         <div class="detail-stats">
           <span>
             <IconEyeFilled :size="15" />
@@ -281,10 +295,10 @@ onMounted(fetchDetail)
             {{ favorited ? '已收藏' : '收藏' }} {{ article.favoriteCount }}
           </el-button>
         </div>
-      </el-card>
+      </article>
 
       <!-- 评论区 -->
-      <el-card class="comment-card">
+      <section class="comment-card">
         <h3 class="comment-title">
           评论（{{ commentsTotal }}）
         </h3>
@@ -378,15 +392,15 @@ onMounted(fetchDetail)
             </div>
           </div>
           <el-pagination
-            v-if="commentsTotal > 20"
+            v-if="commentsTotal > appConfig.pagination.commentPageSize"
             v-model:current-page="commentsPage"
             layout="prev, pager, next"
             :total="commentsTotal"
-            :page-size="20"
+            :page-size="appConfig.pagination.commentPageSize"
             @current-change="fetchComments"
           />
         </div>
-      </el-card>
+      </section>
 
       <div class="detail-actions">
         <el-button @click="router.back()">
@@ -403,21 +417,39 @@ onMounted(fetchDetail)
 
 <style scoped>
 .detail-page {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 24px;
 }
 
 .detail-card,
 .comment-card {
-  border-radius: 8px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  background: var(--app-surface-solid);
+  box-shadow: var(--app-shadow-soft);
+}
+
+.detail-card {
+  padding: clamp(28px, 5vw, 56px) clamp(22px, 7vw, 76px) 40px;
+}
+
+.detail-kicker {
+  margin: 0 0 18px;
+  color: var(--app-primary-strong);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
 }
 
 .detail-title {
-  margin: 8px 0 16px;
-  font-size: calc(var(--app-font-size) + 10px);
+  margin: 0 0 20px;
+  font-size: clamp(30px, 5vw, 52px);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  line-height: 1.16;
   color: var(--app-text);
 }
 
@@ -426,8 +458,8 @@ onMounted(fetchDetail)
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 12px;
-  font-size: calc(var(--app-font-size) - 3px);
+  margin-bottom: 20px;
+  font-size: 13px;
   color: var(--app-text-secondary);
 }
 
@@ -440,12 +472,22 @@ onMounted(fetchDetail)
   margin-left: auto;
 }
 
+.detail-summary {
+  margin: 0 0 24px;
+  padding-left: 16px;
+  border-left: 3px solid var(--app-primary);
+  color: var(--app-text-secondary);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
 .detail-stats {
   display: flex;
-  gap: 16px;
-  padding-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 14px 0 20px;
   border-bottom: 1px solid var(--app-border);
-  font-size: calc(var(--app-font-size) - 3px);
+  font-size: 12px;
   color: var(--app-text-secondary);
 }
 
@@ -454,14 +496,46 @@ onMounted(fetchDetail)
 }
 
 .detail-content {
-  padding-top: 8px;
+  padding-top: 28px;
+}
+
+.detail-content :deep(.md-editor-preview-wrapper) {
+  padding: 0;
+}
+
+.detail-content :deep(.md-editor-preview) {
+  color: var(--app-text);
+  font-family: inherit;
+  font-size: 17px;
+  line-height: 1.9;
+}
+
+.detail-content :deep(.md-editor-preview h1),
+.detail-content :deep(.md-editor-preview h2),
+.detail-content :deep(.md-editor-preview h3) {
+  margin-top: 2em;
+  color: var(--app-text);
+  letter-spacing: -0.025em;
+}
+
+.detail-content :deep(.md-editor-preview a) {
+  color: var(--app-primary-strong);
+}
+
+.detail-content :deep(.md-editor-preview blockquote) {
+  border-left-color: var(--app-primary);
+  background: var(--app-muted);
+}
+
+.detail-content :deep(.md-editor-preview code) {
+  color: var(--app-primary-strong);
 }
 
 .detail-interactions {
   display: flex;
-  gap: 12px;
-  margin-top: 20px;
-  padding-top: 16px;
+  gap: 10px;
+  margin-top: 34px;
+  padding-top: 22px;
   border-top: 1px solid var(--app-border);
 }
 
@@ -471,9 +545,14 @@ onMounted(fetchDetail)
 }
 
 .comment-title {
-  margin: 0 0 12px;
-  font-size: calc(var(--app-font-size) + 2px);
+  margin: 0 0 20px;
+  font-size: 20px;
+  letter-spacing: -0.02em;
   color: var(--app-text);
+}
+
+.comment-card {
+  padding: 28px clamp(22px, 5vw, 48px) 36px;
 }
 
 .comment-input {
@@ -488,7 +567,7 @@ onMounted(fetchDetail)
 }
 
 .comment-item {
-  padding: 12px 0;
+  padding: 18px 0;
   border-top: 1px solid var(--app-border);
 }
 
@@ -500,18 +579,18 @@ onMounted(fetchDetail)
 
 .comment-nickname {
   font-weight: 600;
-  font-size: calc(var(--app-font-size) - 2px);
+  font-size: 13px;
   color: var(--app-text-secondary);
 }
 
 .comment-time {
-  font-size: calc(var(--app-font-size) - 4px);
+  font-size: 12px;
   color: var(--app-text-secondary);
 }
 
 .comment-content {
-  margin: 6px 0;
-  font-size: calc(var(--app-font-size) - 2px);
+  margin: 8px 0;
+  font-size: 14px;
   color: var(--app-text);
   white-space: pre-wrap;
 }
@@ -520,7 +599,7 @@ onMounted(fetchDetail)
   margin-top: 8px;
   padding: 8px 12px;
   background: var(--app-muted);
-  border-radius: 6px;
+  border-radius: var(--app-radius-sm);
 }
 
 .comment-reply {
@@ -528,12 +607,36 @@ onMounted(fetchDetail)
   align-items: baseline;
   gap: 8px;
   padding: 4px 0;
-  font-size: calc(var(--app-font-size) - 3px);
+  font-size: 13px;
 }
 
 .comment-reply-content {
   flex: 1;
   color: var(--app-text-secondary);
   white-space: pre-wrap;
+}
+
+@media (max-width: 600px) {
+  .detail-page {
+    gap: 16px;
+  }
+
+  .detail-meta {
+    align-items: flex-start;
+  }
+
+  .detail-time {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .detail-content :deep(.md-editor-preview) {
+    font-size: 16px;
+    line-height: 1.8;
+  }
+
+  .detail-interactions :deep(.el-button) {
+    flex: 1;
+  }
 }
 </style>

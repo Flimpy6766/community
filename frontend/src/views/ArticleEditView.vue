@@ -27,6 +27,8 @@ const form = reactive({
   tags: [] as string[],
 })
 
+const contentLength = computed(() => form.content.replace(/\s/g, '').length)
+
 const rules: FormRules = {
   title: [
     { required: true, message: '请输入标题', trigger: 'blur' },
@@ -55,7 +57,7 @@ async function fetchArticle() {
     form.content = article.content || ''
     form.tags = article.tags || []
   } catch {
-    router.push('/')
+    router.push('/home')
   } finally {
     loading.value = false
   }
@@ -101,111 +103,303 @@ onMounted(fetchArticle)
     v-loading="loading"
     class="edit-page"
   >
-    <el-card class="edit-card">
-      <h1 class="edit-title">
-        {{ isEdit ? '编辑文章' : '发布文章' }}
-      </h1>
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        label-position="top"
-      >
-        <el-form-item
-          label="标题"
-          prop="title"
-        >
-          <el-input
-            v-model="form.title"
-            maxlength="100"
-            show-word-limit
-            placeholder="文章标题"
-          />
-        </el-form-item>
-        <el-form-item label="摘要">
-          <el-input
-            v-model="form.summary"
-            type="textarea"
-            :rows="2"
-            maxlength="255"
-            show-word-limit
-            placeholder="一句话简介，列表页会展示"
-          />
-        </el-form-item>
-        <el-form-item label="标签">
-          <el-select
-            v-model="form.tags"
-            multiple
-            filterable
-            allow-create
-            default-first-option
-            placeholder="输入标签名后回车创建"
+    <div class="edit-shell">
+      <header class="edit-topbar">
+        <div class="edit-heading">
+          <el-button
+            text
+            @click="router.back()"
           >
-            <el-option
-              v-for="tag in form.tags"
-              :key="tag"
-              :label="tag"
-              :value="tag"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="封面图 URL（选填）">
-          <el-input
-            v-model="form.cover"
-            placeholder="https://example.com/cover.png"
-          />
-        </el-form-item>
-        <el-form-item label="正文（支持 Markdown）">
-          <MdEditor
-            v-model="form.content"
-            class="edit-editor"
-            :theme="editorTheme"
-          />
-        </el-form-item>
+            返回
+          </el-button>
+          <div>
+            <p class="edit-kicker">EDITORIAL WORKSPACE</p>
+            <h1 class="edit-title">
+              {{ isEdit ? '编辑文章' : '发布文章' }}
+            </h1>
+          </div>
+        </div>
+        <span class="edit-status">
+          {{ contentLength ? `${contentLength.toLocaleString()} 字` : '准备开始写作' }}
+        </span>
         <div class="edit-actions">
           <el-button
             :loading="saving"
             @click="handleSave(0)"
           >
-            存草稿
+            保存草稿
           </el-button>
           <el-button
             type="primary"
             :loading="saving"
             @click="handleSave(1)"
           >
-            发布
+            发布文章
           </el-button>
         </div>
+      </header>
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="rules"
+        label-position="top"
+      >
+        <div class="edit-workspace">
+          <section class="edit-main">
+            <el-form-item
+              class="title-field"
+              prop="title"
+            >
+              <el-input
+                v-model="form.title"
+                class="title-input"
+                maxlength="100"
+                show-word-limit
+                placeholder="输入文章标题"
+              />
+            </el-form-item>
+            <el-form-item
+              class="content-field"
+              label="正文"
+            >
+              <MdEditor
+                v-model="form.content"
+                class="edit-editor"
+                :theme="editorTheme"
+              />
+            </el-form-item>
+          </section>
+
+          <aside class="edit-sidebar">
+            <div class="sidebar-heading">
+              <span>文章设置</span>
+              <span class="sidebar-hint">发布前完善信息</span>
+            </div>
+            <el-form-item label="摘要">
+              <el-input
+                v-model="form.summary"
+                type="textarea"
+                :rows="4"
+                maxlength="255"
+                show-word-limit
+                placeholder="一句话简介，列表页会展示"
+              />
+            </el-form-item>
+            <el-form-item label="标签">
+              <el-select
+                v-model="form.tags"
+                multiple
+                filterable
+                allow-create
+                default-first-option
+                placeholder="输入后回车创建"
+              >
+                <el-option
+                  v-for="tag in form.tags"
+                  :key="tag"
+                  :label="tag"
+                  :value="tag"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="封面图 URL（选填）">
+              <el-input
+                v-model="form.cover"
+                placeholder="https://example.com/cover.png"
+              />
+            </el-form-item>
+            <p class="sidebar-note">
+              Markdown 支持标题、代码块、图片、链接和列表。发布后可以继续编辑。
+            </p>
+          </aside>
+        </div>
       </el-form>
-    </el-card>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .edit-page {
-  max-width: 900px;
+  width: min(1400px, calc(100% - 48px));
   margin: 0 auto;
+  padding: 30px 0 72px;
 }
 
-.edit-card {
-  border-radius: 8px;
+.edit-shell {
+  overflow: visible;
+}
+
+.edit-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 0 8px 26px;
+}
+
+.edit-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.edit-kicker {
+  margin: 0 0 4px;
+  color: var(--app-primary-strong);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
 }
 
 .edit-title {
-  margin: 0 0 20px;
-  font-size: calc(var(--app-font-size) + 6px);
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
   color: var(--app-text);
+}
+
+.edit-status {
+  margin-left: auto;
+  color: var(--app-text-secondary);
+  font-size: 12px;
 }
 
 .edit-editor {
   width: 100%;
-  height: 480px;
+  height: 620px;
 }
 
 .edit-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 12px;
+}
+
+.edit-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  align-items: start;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  background: color-mix(in srgb, var(--app-surface-solid) 92%, transparent);
+  box-shadow: var(--app-shadow-soft);
+}
+
+.edit-main {
+  min-width: 0;
+  padding: 42px 52px 48px;
+}
+
+.edit-sidebar {
+  min-height: 690px;
+  padding: 38px 28px;
+  border-left: 1px solid var(--app-border);
+  background: color-mix(in srgb, var(--app-muted) 52%, transparent);
+}
+
+.title-field {
+  margin-bottom: 24px;
+}
+
+.title-input :deep(.el-input__wrapper) {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.title-input :deep(.el-input__inner) {
+  height: 68px;
+  color: var(--app-text);
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+}
+
+.edit-editor :deep(.md-editor) {
+  border-color: var(--app-border);
+  border-radius: var(--app-radius-md);
+  background: transparent;
+}
+
+.edit-editor :deep(.md-editor-toolbar-wrapper) {
+  background: color-mix(in srgb, var(--app-muted) 60%, transparent);
+}
+
+.edit-editor :deep(.md-editor-content) {
+  background: color-mix(in srgb, var(--app-surface-solid) 58%, transparent);
+}
+
+.content-field {
+  margin-bottom: 0;
+}
+
+.sidebar-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 24px;
+  color: var(--app-text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.sidebar-hint {
+  color: var(--app-text-secondary);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.sidebar-note {
+  margin: 24px 0 0;
+  color: var(--app-text-secondary);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+@media (max-width: 900px) {
+  .edit-page {
+    width: min(100% - 28px, 720px);
+    padding-top: 12px;
+  }
+
+  .edit-workspace {
+    display: block;
+  }
+
+  .edit-sidebar {
+    min-height: 0;
+    border-top: 1px solid var(--app-border);
+    border-left: 0;
+  }
+
+  .edit-status {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .edit-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 8px 0 18px;
+  }
+
+  .edit-topbar .edit-actions {
+    width: 100%;
+  }
+
+  .edit-topbar .edit-actions :deep(.el-button) {
+    flex: 1;
+  }
+
+  .edit-main,
+  .edit-sidebar {
+    padding: 22px 18px;
+  }
+
+  .edit-editor {
+    height: 500px;
+  }
 }
 </style>

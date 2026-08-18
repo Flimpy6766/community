@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.community.article.mapper.CommentMapper">
+
+    <select id="selectTopCommentVOs" resultType="com.community.user.dto.response.response.CommentVO">
+        SELECT c.id,
+               c.user_id,
+               u.nickname,
+               c.content,
+               c.create_time
+        FROM comment c
+        LEFT JOIN `user` u ON u.id = c.user_id
+        WHERE c.article_id = #{articleId}
+          AND c.parent_id = 0
+        ORDER BY c.create_time DESC
+    </select>
+
+    <select id="selectReplyVOs" resultType="com.community.user.dto.response.response.CommentVO">
+        SELECT c.id,
+               c.parent_id,
+               c.user_id,
+               u.nickname,
+               c.content,
+               c.create_time
+        FROM comment c
+        LEFT JOIN `user` u ON u.id = c.user_id
+        WHERE c.article_id = #{articleId}
+          AND c.parent_id IN
+          <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
+              #{parentId}
+          </foreach>
+        ORDER BY c.create_time DESC
+    </select>
+
+</mapper>

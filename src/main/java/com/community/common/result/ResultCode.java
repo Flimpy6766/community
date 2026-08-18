@@ -1,9 +1,6 @@
 package com.community.common.result;
 
 
-import lombok.Getter;
-
-@Getter
 public enum ResultCode {
     SUCCESS(0, "success"),
     FAILED(500, "操作失败"),
@@ -15,6 +12,14 @@ public enum ResultCode {
 
     private final Integer code;
     private final String message;
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 
     ResultCode(Integer code, String message){
         this.code = code;

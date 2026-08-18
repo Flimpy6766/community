@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ArticleCard from '@/components/ArticleCard.vue'
 import { getMyArticles, type ArticleVO } from '@/api/article'
+import { appConfig } from '@/config/app'
 
 type StatusTab = 'all' | 'draft' | 'published'
 
@@ -12,7 +13,7 @@ const loading = ref(false)
 const articles = ref<ArticleVO[]>([])
 const total = ref(0)
 const currentPage = ref(1)
-const pageSize = 10
+const pageSize = appConfig.pagination.defaultPageSize
 const activeTab = ref<StatusTab>('all')
 
 // tab → 后端 status 参数（undefined = 全部）

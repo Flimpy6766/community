@@ -11,6 +11,7 @@ body {
   background-color: var(--app-bg, #e8f0fa);
   color: var(--app-text, #1d2129);
   font-size: var(--app-font-size, 16px);
+  line-height: 1.5;
   font-family:
     system-ui,
     -apple-system,
@@ -25,6 +26,20 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+[role='button']:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 3px;
 }
 
 a {

@@ -3,6 +3,7 @@ import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { FormInstance, FormRules } from 'element-plus'
 import { register } from '@/api/auth'
+import { siteConfig } from '@/config/site'
 
 const router = useRouter()
 
@@ -75,9 +76,9 @@ async function handleRegister() {
 <template>
   <div class="auth-page">
     <el-card class="auth-card">
-      <h1 class="auth-title">
-        注册 Community 账号
-      </h1>
+      <p class="auth-kicker">COMMUNITY / JOIN US</p>
+      <h1 class="auth-title">注册 {{ siteConfig.brand }} 账号</h1>
+      <p class="auth-description">创建账号，开始发布和收藏你的内容。</p>
       <el-form
         ref="formRef"
         :model="form"
@@ -159,14 +160,34 @@ async function handleRegister() {
 
 .auth-card {
   width: 100%;
-  max-width: 420px;
-  border-radius: 12px;
+  max-width: 430px;
+  padding: 12px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  background: var(--app-surface-solid);
+  box-shadow: var(--app-shadow-popover);
+}
+
+.auth-kicker {
+  margin: 0 0 12px;
+  color: var(--app-primary-strong);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
 }
 
 .auth-title {
-  margin: 0 0 24px;
-  text-align: center;
-  font-size: calc(var(--app-font-size) + 8px);
+  margin: 0;
+  color: var(--app-text);
+  font-size: 28px;
+  font-weight: 750;
+  letter-spacing: -0.04em;
+}
+
+.auth-description {
+  margin: 10px 0 28px;
+  color: var(--app-text-secondary);
+  font-size: 13px;
 }
 
 .auth-submit {

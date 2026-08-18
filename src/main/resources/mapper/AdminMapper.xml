@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.community.admin.mapper.AdminMapper">
+
+    <select id="selectOverview"
+            resultType="com.community.admin.dto.response.AdminOverviewVO">
+        SELECT
+            (SELECT COUNT(*) FROM article) AS article_count,
+            (SELECT COUNT(*) FROM `user`) AS user_count,
+            (SELECT COUNT(*) FROM comment) AS comment_count,
+            (SELECT COUNT(*) FROM tag) AS tag_count
+    </select>
+
+    <select id="selectAdminArticles"
+            resultType="com.community.admin.dto.response.AdminArticleVO">
+        SELECT a.id,
+               a.title,
+               u.nickname AS author_name,
+               a.status,
+               a.view_count,
+               a.like_count,
+               a.favorite_count,
+               a.comment_count,
+               a.create_time
+        FROM article a
+        LEFT JOIN `user` u ON u.id = a.user_id
+        ORDER BY a.create_time DESC
+    </select>
+
+</mapper>

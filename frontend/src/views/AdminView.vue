@@ -14,13 +14,14 @@ import {
   type AdminArticleVO,
   type AdminOverview,
 } from '@/api/admin'
+import { appConfig } from '@/config/app'
 
 const overview = ref<AdminOverview | null>(null)
 const loading = ref(false)
 const articles = ref<AdminArticleVO[]>([])
 const total = ref(0)
 const currentPage = ref(1)
-const pageSize = 10
+const pageSize = appConfig.pagination.defaultPageSize
 
 async function fetchOverview() {
   try {
@@ -43,7 +44,14 @@ async function fetchArticles() {
   }
 }
 
-async function handleDelete(row: AdminArticleVO) {
+function isAdminArticleRow(value: unknown): value is Pick<AdminArticleVO, 'id' | 'title'> {
+  if (typeof value !== 'object' || value === null) return false
+  const record = value as Record<string, unknown>
+  return typeof record.id === 'number' && typeof record.title === 'string'
+}
+
+async function handleDelete(row: unknown) {
+  if (!isAdminArticleRow(row)) return
   const confirmed = await ElMessageBox.confirm(
     `确定删除文章《${row.title}》吗？删除后不可恢复`,
     '删除确认',
@@ -72,9 +80,11 @@ onMounted(() => {
 
 <template>
   <div class="admin-page">
-    <h1 class="page-title">
-      后台管理
-    </h1>
+    <header class="page-header">
+      <p class="page-kicker">COMMUNITY / ADMINISTRATION</p>
+      <h1 class="page-title">后台管理</h1>
+      <p class="page-description">管理社区内容并查看基本运营数据。</p>
+    </header>
 
     <!-- 统计概览 -->
     <div
@@ -197,15 +207,39 @@ onMounted(() => {
 
 <style scoped>
 .admin-page {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 24px 0 72px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
+}
+
+.page-header {
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.page-kicker {
+  margin: 0 0 12px;
+  color: var(--app-primary-strong);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
 }
 
 .page-title {
   margin: 0;
-  font-size: calc(var(--app-font-size) + 8px);
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 750;
+  letter-spacing: -0.04em;
   color: var(--app-text);
+}
+
+.page-description {
+  margin: 12px 0 0;
+  color: var(--app-text-secondary);
+  font-size: 14px;
 }
 
 .admin-stats {
@@ -219,10 +253,11 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding: 20px 12px;
+  padding: 22px 12px;
   background: var(--app-surface-solid);
   border: 1px solid var(--app-border);
-  border-radius: 10px;
+  border-radius: var(--app-radius-md);
+  box-shadow: var(--app-shadow-soft);
   color: var(--app-primary);
 }
 
@@ -238,7 +273,9 @@ onMounted(() => {
 }
 
 .admin-articles-card {
-  border-radius: 12px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow-soft);
 }
 
 .card-title {
@@ -250,5 +287,15 @@ onMounted(() => {
 .admin-pagination {
   justify-content: center;
   margin-top: 12px;
+}
+
+@media (max-width: 720px) {
+  .admin-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-articles-card :deep(.el-table) {
+    font-size: 12px;
+  }
 }
 </style>

@@ -36,8 +36,22 @@ frontend/dist/
 *.log
 logs/
 
+### 本地/生产环境变量 ###
+.env
+.env.*
+!.env.example
+
 ### 环境工具 ###
 .claude/
 .agents/
 .codex/
 AGENTS.md
+
+### 练习区（不提交） ###
+practice/
+INTERVIEW.md
+WORK_HARNESS.md
+
+### 项目辅导和规划文档（仅本地保留） ###
+Community AI cloud plan.md
+DEPLOYMENT.md

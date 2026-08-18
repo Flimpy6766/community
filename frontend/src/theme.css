@@ -9,27 +9,27 @@
 :root,
 html[data-theme='blue-light'] {
   --app-font-size: 16px;
-  --app-primary: #4d9bf8;
-  --app-primary-strong: #3b82f6;
-  --app-primary-soft: rgba(77, 155, 248, 0.12);
-  --app-bg: #e8f0fa;
-  --app-bg-start: #d9e9fb;
-  --app-bg-end: #f6fafd;
-  --app-bg-shape-1: rgba(96, 165, 250, 0.07);
-  --app-bg-shape-2: rgba(59, 130, 246, 0.06);
-  --app-bg-shape-3: rgba(147, 197, 253, 0.08);
-  --app-bg-shape-4: rgba(96, 165, 250, 0.06);
-  --app-bg-cloud: #a8cbfa;
-  --app-surface: rgba(255, 255, 255, 0.6);
+  --app-primary: #3b82f6;
+  --app-primary-strong: #2563eb;
+  --app-primary-soft: rgba(59, 130, 246, 0.1);
+  --app-bg: #f4f6fa;
+  --app-bg-start: #edf2f9;
+  --app-bg-end: #fbfcfe;
+  --app-bg-shape-1: rgba(96, 165, 250, 0.045);
+  --app-bg-shape-2: rgba(59, 130, 246, 0.04);
+  --app-bg-shape-3: rgba(147, 197, 253, 0.05);
+  --app-bg-shape-4: rgba(96, 165, 250, 0.04);
+  --app-bg-cloud: #b7c9e3;
+  --app-surface: rgba(255, 255, 255, 0.82);
   --app-surface-solid: #ffffff;
-  --app-text: #1d2129;
-  --app-text-secondary: #667085;
-  --app-icon: #4d9bf8;
-  --app-grad-start: #3b82f6;
-  --app-grad-end: #a855f7;
-  --app-divider: rgba(0, 0, 0, 0.15);
-  --app-border: rgba(0, 0, 0, 0.08);
-  --app-muted: rgba(0, 0, 0, 0.05);
+  --app-text: #182230;
+  --app-text-secondary: #697586;
+  --app-icon: #3b82f6;
+  --app-grad-start: #2563eb;
+  --app-grad-end: #7c3aed;
+  --app-divider: rgba(24, 34, 48, 0.12);
+  --app-border: rgba(24, 34, 48, 0.09);
+  --app-muted: rgba(24, 34, 48, 0.04);
   --app-auth-bg: linear-gradient(135deg, #eef2ff 0%, #fdf4ff 100%);
   --el-color-primary: #4d9bf8;
   --el-color-primary-light-3: #82b9fa;
@@ -41,6 +41,15 @@ html[data-theme='blue-light'] {
   --el-card-bg-color: var(--app-surface-solid);
   --el-border-color: var(--app-border);
   --el-border-color-light: var(--app-border);
+}
+
+:root {
+  --app-radius-sm: 6px;
+  --app-radius-md: 10px;
+  --app-radius-lg: 14px;
+  --app-content-width: 1180px;
+  --app-shadow-soft: 0 8px 28px rgba(24, 34, 48, 0.06);
+  --app-shadow-popover: 0 14px 36px rgba(24, 34, 48, 0.12);
 }
 
 html[data-theme='blue-dark'] {

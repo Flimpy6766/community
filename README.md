@@ -95,8 +95,3 @@ UPDATE user SET role = 'ADMIN' WHERE id = 你的id;
 cd frontend && pnpm build     # 产物在 frontend/dist
 mvn package                   # 后端打包 jar
 ```
-
-## 相关文档
-
-- `frontend/README.md`：前端开发命令
-- `frontend/communityExplain/`：按文件分级的中文阅读文档（作用 / 使用范围 / 使用场景，本地阅读，已加入 `.gitignore`）

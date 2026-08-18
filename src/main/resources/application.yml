@@ -3,17 +3,32 @@ spring:
     name: community
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/community
-    username: root
-    password: 123456
+    url: jdbc:mysql://${COMMUNITY_DB_HOST:localhost}:${COMMUNITY_DB_PORT:3306}/${COMMUNITY_DB_NAME:community}
+    username: ${COMMUNITY_DB_USERNAME:root}
+    password: ${COMMUNITY_DB_PASSWORD:root}
   data:
     redis:
-      host: 127.0.0.1
-      port: 6379
-
+      host: ${COMMUNITY_REDIS_HOST:127.0.0.1}
+      port: ${COMMUNITY_REDIS_PORT:6379}
+      database: ${COMMUNITY_REDIS_DATABASE:0}
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 1
+    validate-on-migrate: true
 server:
+  port: ${COMMUNITY_SERVER_PORT:8080}
   servlet:
     context-path: /api
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
 
 mybatis-plus:
   configuration:
@@ -23,7 +38,8 @@ mybatis-plus:
       logic-delete-field: deleted
 
 community:
+  cors:
+    allowed-origins: ${COMMUNITY_CORS_ALLOWED_ORIGINS:http://localhost:5173}
   jwt:
-    secret: community-jwt-secret-2026-keep-it-safe-x
-    expire: 604800000
-
+    secret: ${COMMUNITY_JWT_SECRET:community-jwt-secret-2026-keep-it-safe-x}
+    expire: ${COMMUNITY_JWT_EXPIRE:604800000}

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.community.article.mapper.FavoriteMapper">
+
+    <select id="selectFavoriteArticles" resultType="com.community.article.entity.Article">
+        SELECT a.*
+        FROM favorite f
+        INNER JOIN article a ON a.id = f.article_id
+        WHERE f.user_id = #{userId}
+        ORDER BY f.create_time DESC
+    </select>
+
+</mapper>

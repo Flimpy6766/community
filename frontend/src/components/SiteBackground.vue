@@ -157,6 +157,20 @@
   pointer-events: none;
 }
 
+.site-bg::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  opacity: 0.68;
+  background-image:
+    radial-gradient(circle at 13% 20%, color-mix(in srgb, var(--app-primary) 13%, transparent), transparent 24%),
+    radial-gradient(circle at 86% 12%, color-mix(in srgb, var(--app-primary) 9%, transparent), transparent 25%),
+    linear-gradient(var(--app-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--app-border) 1px, transparent 1px);
+  background-size: auto, auto, 72px 72px, 72px 72px;
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
+}
+
 .site-bg svg {
   width: 100%;
   height: 100%;

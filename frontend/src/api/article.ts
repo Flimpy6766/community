@@ -1,4 +1,5 @@
 import request from '@/utils/request'
+import { appConfig } from '@/config/app'
 
 // 与后端 ArticleVO 对应
 export interface ArticleVO {
@@ -118,7 +119,7 @@ export function toggleFavorite(id: number | string): Promise<FavoriteResult> {
 export function getComments(
   id: number | string,
   page: number,
-  size = 20,
+  size = appConfig.pagination.commentPageSize,
 ): Promise<PageResult<CommentItem>> {
   return request.get(`/article/${id}/comments`, { params: { page, size } }) as unknown as Promise<
     PageResult<CommentItem>
@@ -136,7 +137,9 @@ export function deleteComment(commentId: number | string): Promise<void> {
 }
 
 // 热榜：GET /api/article/hot?limit=10（无分页，直接返回数组）
-export function getHotArticles(limit = 10): Promise<ArticleVO[]> {
+export function getHotArticles(
+  limit: number = appConfig.hot.defaultLimit,
+): Promise<ArticleVO[]> {
   return request.get('/article/hot', { params: { limit } }) as unknown as Promise<ArticleVO[]>
 }
 

@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import {
   IconEditFilled,
+  IconFileTextFilled,
   IconDashboardFilled,
   IconFlameFilled,
   IconHomeFilled,
@@ -16,6 +17,7 @@ import {
 } from '@tabler/icons-vue'
 import { useThemeStore } from '@/stores/theme'
 import { useUserStore } from '@/stores/user'
+import { siteConfig } from '@/config/site'
 
 const route = useRoute()
 const router = useRouter()
@@ -28,7 +30,7 @@ const searchKeyword = ref('')
 // 提交搜索：带 keyword 跳主页（主页根据 ?keyword= 展示搜索结果）
 function handleSearch() {
   const kw = searchKeyword.value.trim()
-  router.push({ path: '/', query: kw ? { keyword: kw } : {} })
+  router.push({ path: '/home', query: kw ? { keyword: kw } : {} })
 }
 
 // 地址栏变化时同步输入框（比如从搜索结果页切走再切回）
@@ -51,6 +53,8 @@ function handleUserCommand(command: string | number | object) {
     router.push('/profile')
   } else if (command === 'admin') {
     router.push('/admin')
+  } else if (command === 'my-articles') {
+    router.push('/my-articles')
   } else if (command === 'logout') {
     handleLogout()
   }
@@ -77,18 +81,18 @@ function handleUserCommand(command: string | number | object) {
             to="/"
           >
             <IconLayoutFilled />
-            <span>Community</span>
+            <span>{{ siteConfig.brand }}</span>
           </router-link>
           <span class="nav-divider" />
 
-          <!-- 左盒子：主页 | 热榜 | 我的收藏 -->
+          <!-- 左盒子：文章 | 热榜 | 收藏 -->
           <nav class="navbar-box">
             <router-link
               class="nav-item"
-              to="/"
+              to="/home"
             >
               <IconHomeFilled />
-              <span>主页</span>
+              <span>文章</span>
             </router-link>
             <router-link
               class="nav-item"
@@ -98,12 +102,11 @@ function handleUserCommand(command: string | number | object) {
               <span>热榜</span>
             </router-link>
             <router-link
-              v-if="userStore.userInfo"
               class="nav-item"
               to="/favorites"
             >
               <IconStarFilled />
-              <span>我的收藏</span>
+              <span>收藏</span>
             </router-link>
           </nav>
 
@@ -218,6 +221,10 @@ function handleUserCommand(command: string | number | object) {
                     <IconUserFilled :size="15" />
                     个人中心
                   </el-dropdown-item>
+                  <el-dropdown-item command="my-articles">
+                    <IconFileTextFilled :size="15" />
+                    我的文章
+                  </el-dropdown-item>
                   <el-dropdown-item
                     v-if="userStore.isAdmin"
                     command="admin"
@@ -248,7 +255,10 @@ function handleUserCommand(command: string | number | object) {
       </header>
       <main
         class="app-main"
-        :class="{ 'app-main--full': route.name === 'home' }"
+        :class="{
+          'app-main--full': route.name === 'landing',
+          'app-main--wide': route.name === 'home',
+        }"
       >
         <!-- KeepAlive 只缓存主页：从详情页返回时列表数据和滚动位置都在 -->
         <KeepAlive include="HomeView">
@@ -264,23 +274,24 @@ function handleUserCommand(command: string | number | object) {
   min-height: 100vh;
 }
 
-/* 导航栏：铺满全宽，左右不预留内边距，半透明毛玻璃让整站背景透出来 */
+/* 导航栏：轻量固定层，内容不使用厚重卡片和分隔盒子 */
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  background: var(--app-surface);
+  background: color-mix(in srgb, var(--app-surface-solid) 86%, transparent);
   border-bottom: 1px solid var(--app-border);
-  -webkit-backdrop-filter: blur(16px) saturate(1.5);
-  backdrop-filter: blur(16px) saturate(1.5);
+  box-shadow: 0 1px 12px rgba(24, 34, 48, 0.035);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  backdrop-filter: blur(18px) saturate(1.15);
 }
 
 .navbar-inner {
   width: 100%;
-  padding: 0;
-  height: 60px;
+  padding: 0 20px;
+  height: 64px;
   display: flex;
   align-items: center;
 }
@@ -288,30 +299,41 @@ function handleUserCommand(command: string | number | object) {
 .navbar-logo {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  font-size: calc(var(--app-font-size) + 6px);
-  font-weight: 700;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: var(--app-radius-sm);
+  font-size: calc(var(--app-font-size) + 4px);
+  font-weight: 750;
+  letter-spacing: -0.02em;
   color: var(--app-text);
   white-space: nowrap;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.navbar-logo:hover {
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
 }
 
 /* 竖线：只放在 logo 和用户两侧，上下各加长 5px（高 34px），不设 margin */
 .nav-divider {
   width: 1px;
-  height: 34px;
+  height: 24px;
   background: var(--app-divider);
+  margin: 0 10px;
 }
 
 /* 导航栏搜索：紧凑胶囊输入框，auto 外边距让它大致居中 */
 .navbar-search {
   margin-left: auto;
-  margin-right: 16px;
-  width: 380px;
+  margin-right: 24px;
+  width: min(360px, 30vw);
   flex-shrink: 1;
 }
 
 .navbar-search :deep(.el-input__wrapper) {
+  min-height: 36px;
+  border: 1px solid transparent;
   border-radius: 999px;
   background: var(--app-muted);
   box-shadow: none;
@@ -320,6 +342,8 @@ function handleUserCommand(command: string | number | object) {
 
 .navbar-search :deep(.el-input__wrapper.is-focus) {
   background: var(--app-surface-solid);
+  border-color: var(--app-border);
+  box-shadow: 0 0 0 3px var(--app-primary-soft);
 }
 
 @media (max-width: 768px) {
@@ -333,8 +357,8 @@ function handleUserCommand(command: string | number | object) {
 .navbar-box {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 8px 10px;
+  gap: 2px;
+  padding: 0;
   background: transparent;
   border-radius: 10px;
 }
@@ -342,11 +366,12 @@ function handleUserCommand(command: string | number | object) {
 .nav-item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  font-size: calc(var(--app-font-size) + 2px);
-  color: var(--app-text);
-  border-radius: 8px;
+  gap: 7px;
+  padding: 9px 11px;
+  font-size: calc(var(--app-font-size) - 1px);
+  font-weight: 550;
+  color: var(--app-text-secondary);
+  border-radius: var(--app-radius-sm);
   cursor: pointer;
   white-space: nowrap;
   transition:
@@ -367,14 +392,15 @@ function handleUserCommand(command: string | number | object) {
 /* 图标跟随文字颜色（默认黑色，hover/激活变主题色），相对字号自动缩放 */
 .nav-item svg,
 .navbar-logo svg {
-  width: 1.15em;
-  height: 1.15em;
+  width: 1.1em;
+  height: 1.1em;
   flex-shrink: 0;
 }
 
 .navbar-box a.router-link-active {
-  color: var(--app-primary);
-  font-weight: 600;
+  color: var(--app-primary-strong);
+  font-weight: 650;
+  background: var(--app-primary-soft);
 }
 
 .navbar-right {
@@ -384,13 +410,13 @@ function handleUserCommand(command: string | number | object) {
 }
 
 .app-main {
-  max-width: 1200px;
+  max-width: var(--app-content-width);
   margin: 0 auto;
-  padding: 16px;
+  padding: 28px 24px 64px;
 }
 
 .app--with-nav .app-main {
-  padding-top: 60px;
+  padding-top: 92px;
 }
 
 /* 主页：hero 铺满全屏，内容区不限制宽度 */
@@ -399,8 +425,54 @@ function handleUserCommand(command: string | number | object) {
   padding: 0;
 }
 
+/* 文章流使用左右功能栏，需要释放全局内容宽度限制 */
+.app-main--wide {
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .app--with-nav .app-main--full {
-  padding-top: 60px;
+  padding-top: 64px;
+}
+
+@media (max-width: 900px) {
+  .navbar-inner {
+    padding: 0 12px;
+  }
+
+  .navbar-search {
+    margin-right: 10px;
+    width: min(260px, 28vw);
+  }
+
+  .nav-item {
+    padding-inline: 8px;
+  }
+}
+
+@media (max-width: 680px) {
+  .navbar-logo span,
+  .nav-item span {
+    display: none;
+  }
+
+  .navbar-logo,
+  .nav-item {
+    padding: 9px;
+  }
+
+  .navbar-search {
+    width: 150px;
+  }
+
+  .navbar-right .nav-divider {
+    margin-inline: 4px;
+  }
+
+  .app-main {
+    padding-inline: 14px;
+  }
 }
 </style>
 

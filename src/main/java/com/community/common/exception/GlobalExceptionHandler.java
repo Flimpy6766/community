@@ -4,14 +4,17 @@ package com.community.common.exception;
 import com.community.common.result.Result;
 import com.community.common.result.ResultCode;
 import jakarta.validation.ConstraintViolationException;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /** 业务异常：预期内的错误，正常提示 */
     @ExceptionHandler(BusinessException.class)

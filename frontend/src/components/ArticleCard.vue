@@ -35,82 +35,99 @@ const preview = computed(() => excerpt(props.article.content || props.article.su
 </script>
 
 <template>
-  <div
+  <article
     class="article-card"
+    :class="{ 'article-card--with-cover': article.cover }"
+    tabindex="0"
+    role="link"
+    :aria-label="`阅读文章：${article.title}`"
     @click="router.push(`/article/${article.id}`)"
+    @keydown.enter="router.push(`/article/${article.id}`)"
   >
-    <p class="article-author">
-      {{ article.nickname || `用户 ${article.userId}` }}
-    </p>
-    <div class="article-card-head">
-      <span
-        v-if="rank"
-        class="article-rank"
-        :class="`rank-${rank}`"
-      >
-        {{ rank }}
-      </span>
+    <div class="article-card-body">
+      <div class="article-card-head">
+        <span
+          v-if="rank"
+          class="article-rank"
+          :class="`rank-${rank}`"
+        >
+          {{ rank }}
+        </span>
+        <p class="article-author">
+          {{ article.nickname || `用户 ${article.userId}` }}
+        </p>
+      </div>
       <h2 class="article-title">
         {{ article.title }}
       </h2>
-    </div>
-    <p
-      v-if="preview"
-      class="article-content"
-    >
-      {{ preview }}
-    </p>
-    <div class="article-tags">
-      <el-tag
-        v-for="tag in article.tags"
-        :key="tag"
-        size="small"
-        type="info"
-        effect="plain"
+      <p
+        v-if="preview"
+        class="article-content"
       >
-        {{ tag }}
-      </el-tag>
+        {{ preview }}
+      </p>
+      <div
+        v-if="article.tags?.length"
+        class="article-tags"
+      >
+        <el-tag
+          v-for="tag in article.tags"
+          :key="tag"
+          class="article-tag"
+          size="small"
+          effect="plain"
+        >
+          {{ tag }}
+        </el-tag>
+      </div>
+      <div class="article-stats">
+        <span><IconEyeFilled :size="14" />{{ article.viewCount }}</span>
+        <span><IconThumbUpFilled :size="14" />{{ article.likeCount }}</span>
+        <span><IconMessageCircleFilled :size="14" />{{ article.commentCount }}</span>
+        <span class="article-time">{{ formatTime(article.createTime) }}</span>
+      </div>
     </div>
-    <div class="article-stats">
-      <span>
-        <IconEyeFilled :size="15" />
-        {{ article.viewCount }}
-      </span>
-      <span>
-        <IconThumbUpFilled :size="15" />
-        {{ article.likeCount }}
-      </span>
-      <span>
-        <IconMessageCircleFilled :size="15" />
-        {{ article.commentCount }}
-      </span>
-      <span class="article-time">{{ formatTime(article.createTime) }}</span>
-    </div>
-  </div>
+    <img
+      v-if="article.cover"
+      class="article-cover"
+      :src="article.cover"
+      alt=""
+      loading="lazy"
+    >
+  </article>
 </template>
 
 <style scoped>
 .article-card {
-  background: var(--app-surface-solid);
-  border: 1px solid var(--app-border);
-  border-radius: 8px;
-  padding: 16px 20px;
+  position: relative;
+  padding: 23px 8px 25px 0;
+  border-top: 1px solid var(--app-border);
   cursor: pointer;
-  transition: box-shadow 0.2s;
+  transition:
+    padding 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.article-card:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: -2px;
 }
 
 .article-card:hover {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding-left: 12px;
+  background: var(--app-muted);
 }
 
 .article-card-head {
   display: flex;
   align-items: center;
+  gap: 9px;
 }
 
 .article-author {
-  margin: 0 0 6px;
-  font-size: calc(var(--app-font-size) - 3px);
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--app-text-secondary);
 }
 
@@ -128,6 +145,25 @@ const preview = computed(() => excerpt(props.article.content || props.article.su
   flex-shrink: 0;
 }
 
+.article-card-body {
+  min-width: 0;
+}
+
+.article-card--with-cover {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 148px;
+  gap: 24px;
+  align-items: center;
+}
+
+.article-cover {
+  width: 148px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: var(--app-radius-md);
+  background: var(--app-muted);
+}
+
 .rank-1 {
   background: #f5222d;
 }
@@ -142,17 +178,19 @@ const preview = computed(() => excerpt(props.article.content || props.article.su
 
 .article-title {
   margin: 0;
-  font-size: calc(var(--app-font-size) + 4px);
+  font-size: clamp(18px, 2vw, 22px);
   font-weight: 700;
   color: var(--app-text);
-  line-height: 1.4;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
 }
 
 .article-content {
-  margin: 8px 0 10px;
-  font-size: calc(var(--app-font-size) - 1px);
+  max-width: 720px;
+  margin: 10px 0 13px;
+  font-size: 14px;
   color: var(--app-text-secondary);
-  line-height: 1.6;
+  line-height: 1.75;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -163,14 +201,20 @@ const preview = computed(() => excerpt(props.article.content || props.article.su
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 13px;
+}
+
+.article-tag {
+  --el-tag-bg-color: var(--app-primary-soft) !important;
+  --el-tag-border-color: transparent !important;
+  --el-tag-text-color: var(--app-primary-strong) !important;
 }
 
 .article-stats {
   display: flex;
   align-items: center;
-  gap: 16px;
-  font-size: calc(var(--app-font-size) - 3px);
+  gap: 14px;
+  font-size: 12px;
   color: var(--app-text-secondary);
 }
 
@@ -181,5 +225,29 @@ const preview = computed(() => excerpt(props.article.content || props.article.su
 
 .article-time {
   margin-left: auto;
+}
+
+@media (max-width: 560px) {
+  .article-card {
+    padding: 20px 0 22px;
+  }
+
+  .article-card:hover {
+    padding-left: 6px;
+  }
+
+  .article-time {
+    display: none;
+  }
+
+  .article-card--with-cover {
+    grid-template-columns: minmax(0, 1fr) 92px;
+    gap: 12px;
+  }
+
+  .article-cover {
+    width: 92px;
+    height: 72px;
+  }
 }
 </style>
